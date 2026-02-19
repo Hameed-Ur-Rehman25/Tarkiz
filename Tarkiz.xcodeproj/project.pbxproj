@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		BCBB99352F45DE27009E396D /* prayer_app_locker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prayer_app_locker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCBB99352F45DE27009E396D /* Tarkiz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tarkiz.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		BCBB99372F45DE27009E396D /* prayer_app_locker */ = {
+		BCBB99372F45DE27009E396D /* Tarkiz */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = prayer_app_locker;
+			path = Tarkiz;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		BCBB992C2F45DE27009E396D = {
 			isa = PBXGroup;
 			children = (
-				BCBB99372F45DE27009E396D /* prayer_app_locker */,
+				BCBB99372F45DE27009E396D /* Tarkiz */,
 				BCBB99362F45DE27009E396D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		BCBB99362F45DE27009E396D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BCBB99352F45DE27009E396D /* prayer_app_locker.app */,
+				BCBB99352F45DE27009E396D /* Tarkiz.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BCBB99342F45DE27009E396D /* prayer_app_locker */ = {
+		BCBB99342F45DE27009E396D /* Tarkiz */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BCBB99402F45DE29009E396D /* Build configuration list for PBXNativeTarget "prayer_app_locker" */;
+			buildConfigurationList = BCBB99402F45DE29009E396D /* Build configuration list for PBXNativeTarget "Tarkiz" */;
 			buildPhases = (
 				BCBB99312F45DE27009E396D /* Sources */,
 				BCBB99322F45DE27009E396D /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BCBB99372F45DE27009E396D /* prayer_app_locker */,
+				BCBB99372F45DE27009E396D /* Tarkiz */,
 			);
-			name = prayer_app_locker;
+			name = Tarkiz;
 			packageProductDependencies = (
 			);
-			productName = prayer_app_locker;
-			productReference = BCBB99352F45DE27009E396D /* prayer_app_locker.app */;
+			productName = Tarkiz;
+			productReference = BCBB99352F45DE27009E396D /* Tarkiz.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BCBB99302F45DE27009E396D /* Build configuration list for PBXProject "prayer_app_locker" */;
+			buildConfigurationList = BCBB99302F45DE27009E396D /* Build configuration list for PBXProject "Tarkiz" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BCBB99342F45DE27009E396D /* prayer_app_locker */,
+				BCBB99342F45DE27009E396D /* Tarkiz */,
 			);
 		};
 /* End PBXProject section */
@@ -255,7 +255,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7442H4GVP;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -287,7 +288,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7442H4GVP;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -313,7 +315,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BCBB99302F45DE27009E396D /* Build configuration list for PBXProject "prayer_app_locker" */ = {
+		BCBB99302F45DE27009E396D /* Build configuration list for PBXProject "Tarkiz" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BCBB993E2F45DE29009E396D /* Debug */,
@@ -322,7 +324,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BCBB99402F45DE29009E396D /* Build configuration list for PBXNativeTarget "prayer_app_locker" */ = {
+		BCBB99402F45DE29009E396D /* Build configuration list for PBXNativeTarget "Tarkiz" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BCBB99412F45DE29009E396D /* Debug */,

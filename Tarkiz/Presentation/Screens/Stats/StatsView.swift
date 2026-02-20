@@ -106,7 +106,7 @@ struct StatsView: View {
                     RoundedCornerShape(radius: 56, corners: [.bottomLeft, .bottomRight])
                 )
                 .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
-                .padding(.bottom, 24)
+                .padding(.bottom, 44)
             }
         }
     }

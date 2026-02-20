@@ -45,21 +45,18 @@ struct MainTabView: View {
                 HomeView()
                     .navigationBarHidden(true)
             }
-            .tabItem { Label("Home",    systemImage: "house.fill") }
             .tag(MainTab.home)
 
             NavigationStack {
                 PrayerTimesView()
                     .navigationBarHidden(true)
             }
-            .tabItem { Label("Prayer",  systemImage: "moon.stars.fill") }
             .tag(MainTab.prayer)
 
             NavigationStack {
                 StatsView()
                     .navigationBarHidden(true)
             }
-            .tabItem { Label("Stats",   systemImage: "chart.bar.fill") }
             .tag(MainTab.stats)
 
             NavigationStack(path: $coordinator.navigationPath) {
@@ -75,8 +72,11 @@ struct MainTabView: View {
                     }
             }
             .environmentObject(coordinator)
-            .tabItem { Label("Settings", systemImage: "gear") }
             .tag(MainTab.settings)
+        }
+        .toolbar(.hidden, for: .tabBar) // Hide default bar
+        .safeAreaInset(edge: .bottom) {
+            CustomTabBar(selectedTab: $coordinator.selectedTab)
         }
         .tint(.appPrimary)
     }

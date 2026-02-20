@@ -2,8 +2,8 @@ import SwiftUI
 
 struct AppTheme {
     // MARK: - Colors
-    static let primaryColor = Color("PrimaryColor") // Ensure these are in Assets
-    static let secondaryColor = Color("SecondaryColor")
+    static let primaryColor = Color("AppPrimaryColor") // Ensure these are in Assets
+    static let secondaryColor = Color("AppSecondaryColor")
     static let errorColor = Color.red
     static let backgroundColor = Color("BackgroundColor")
     static let sageGreen = Color("SageGreen")

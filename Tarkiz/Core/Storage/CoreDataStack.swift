@@ -5,7 +5,7 @@ final class CoreDataStack {
     static let shared = CoreDataStack()
     
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "FocusPauseFlow")
+        let container = NSPersistentContainer(name: "tarkiz")
         container.loadPersistentStores { (storeDescription, error) in
             if let error = error as NSError? {
                 Logger.shared.error("Unresolved error \(error), \(error.userInfo)")

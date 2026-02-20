@@ -11,7 +11,7 @@ protocol KeychainService {
 final class KeychainServiceImpl: KeychainService {
     private let service: String
     
-    init(service: String = Bundle.main.bundleIdentifier ?? "com.focuspauseflow.app") {
+    init(service: String = Bundle.main.bundleIdentifier ?? "com.tarkiz.app") {
         self.service = service
     }
     

@@ -3,7 +3,7 @@ import Foundation
 
 final class Logger {
     static let shared = Logger()
-    private let subsystem = Bundle.main.bundleIdentifier ?? "com.focuspauseflow.app"
+    private let subsystem = Bundle.main.bundleIdentifier ?? "com.tarkiz.app"
     
     private init() {}
     

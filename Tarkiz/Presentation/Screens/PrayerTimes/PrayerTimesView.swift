@@ -81,7 +81,7 @@ struct PrayerTimesView: View {
                     RoundedCornerShape(radius: 56, corners: [.bottomLeft, .bottomRight])
                 )
                 .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
-                .padding(.bottom, 44)
+                .padding(.bottom, 64)
             }
         }
     }

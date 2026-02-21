@@ -68,25 +68,11 @@ struct HomeView: View {
 
                     Spacer()
 
-                    // Large Icon with corner brackets
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 40)
-                            .fill(Color.appSecondary.opacity(0.5))
-                            .frame(width: 176, height: 176)
-                            .shadow(color: .black.opacity(0.1), radius: 10, y: 4)
-
-                        Text(viewModel.selectedMode.icon)
-                            .font(.system(size: 70))
-
-                        if viewModel.isLocked {
-                            Circle()
-                                .fill(Color.appAccent)
-                                .frame(width: 16, height: 16)
-                                .shadow(color: .appAccent.opacity(0.4), radius: 4)
-                                .offset(y: 96)
-                                .pulseAnimation()
-                        }
-                    }
+                    // Large NFC Icon
+                    Image("NFCLogo")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 176, height: 176)
 
                     // Mode selector button
                     Button {

@@ -75,9 +75,6 @@ struct HomeView: View {
                             .frame(width: 176, height: 176)
                             .shadow(color: .black.opacity(0.1), radius: 10, y: 4)
 
-                        CornerBrackets(size: 176, inset: 12, bracketLength: 24, cornerRadius: 8)
-                            .stroke(Color.appMutedForeground.opacity(0.3), lineWidth: 2)
-
                         Text(viewModel.selectedMode.icon)
                             .font(.system(size: 70))
 

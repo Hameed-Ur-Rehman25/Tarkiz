@@ -75,6 +75,9 @@ struct MainTabView: View {
             .tag(MainTab.settings)
         }
         .toolbar(.hidden, for: .tabBar) // Hide default bar
+        .safeAreaInset(edge: .top, spacing: 0) {
+            Color.appCard.ignoresSafeArea(edges: .top).frame(height: 0)
+        }
         .safeAreaInset(edge: .bottom) {
             CustomTabBar(selectedTab: $coordinator.selectedTab)
         }

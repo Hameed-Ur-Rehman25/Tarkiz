@@ -128,17 +128,9 @@ struct CurrentPrayerCard: View {
                 Divider()
                     .background(Color.appPrimary.opacity(0.2))
                     .padding(.top, 16)
-                (
-                    Text("Next: ")
-                        .font(.system(size: 14))
-                        .foregroundColor(.appMutedForeground)
-                    + Text(next.name)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.appForeground)
-                    + Text(" at \(next.time)")
-                        .font(.system(size: 14))
-                        .foregroundColor(.appMutedForeground)
-                )
+                Text("Next: \(Text(next.name).fontWeight(.medium).foregroundColor(.appForeground)) at \(next.time)")
+                    .font(.system(size: 14))
+                    .foregroundColor(.appMutedForeground)
             }
         }
         .padding(20)

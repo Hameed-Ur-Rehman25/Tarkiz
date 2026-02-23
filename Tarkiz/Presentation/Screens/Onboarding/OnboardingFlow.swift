@@ -138,26 +138,7 @@ struct OnboardingFlow: View {
 
 // MARK: - Shared Sub-views
 
-/// Floating illustration box with corner brackets
-private struct IllustrationBox<Content: View>: View {
-    let content: Content
-    init(@ViewBuilder content: () -> Content) { self.content = content() }
 
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color.appCard)
-                .shadow(color: .black.opacity(0.12), radius: 25, y: 10)
-                .frame(width: 128, height: 128)
-
-            content
-
-            CornerBrackets(size: 148, inset: 0, bracketLength: 20, cornerRadius: 8)
-                .stroke(Color.appMutedForeground.opacity(0.3), lineWidth: 2)
-                .frame(width: 148, height: 148)
-        }
-    }
-}
 
 /// Back button used across steps
 private struct BackButton: View {
@@ -215,7 +196,10 @@ private struct WelcomeStep: View {
                     .foregroundColor(.appForeground)
                     .padding(.bottom, 48)
 
-                IllustrationBox { Text("🕌").font(.system(size: 48)) }
+                Image("NFCLogo")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 176, height: 176)
 
                 Spacer()
 
@@ -552,11 +536,10 @@ private struct NFCStep: View {
                 .foregroundColor(.appForeground)
                 .padding(.bottom, 48)
 
-            IllustrationBox {
-                Text("NFC")
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(.appMutedForeground)
-            }
+            Image("NFCLogo")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 176, height: 176)
 
             Spacer()
 

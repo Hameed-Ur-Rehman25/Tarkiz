@@ -5,6 +5,7 @@ struct TarkizApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .preferredColorScheme(.light)
         }
     }
 }

@@ -15,11 +15,6 @@ struct CustomTabBar: View {
                         Text(tab.label)
                             .font(.system(size: 15, weight: selectedTab == tab ? .bold : .medium))
                             .foregroundColor(selectedTab == tab ? Color.primary.opacity(0.8) : Color.primary.opacity(0.4))
-                        
-                        // Active Indicator Dot
-                        Circle()
-                            .fill(selectedTab == tab ? Color.primary.opacity(0.8) : Color.clear)
-                            .frame(width: 3.5, height: 3.5)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)

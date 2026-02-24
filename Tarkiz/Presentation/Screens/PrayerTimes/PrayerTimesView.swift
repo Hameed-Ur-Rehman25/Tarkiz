@@ -191,9 +191,19 @@ struct PrayerRow: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(prayer.name)
-                    .font(.system(size: 16, weight: prayer.isActive ? .semibold : .medium))
-                    .foregroundColor(nameColor)
+                HStack(spacing: 6) {
+                    Text(prayer.name)
+                        .font(.system(size: 16, weight: prayer.isActive ? .semibold : .medium))
+                        .foregroundColor(nameColor)
+                    
+                    if prayer.isActive {
+                        Circle()
+                            .fill(Color.appPrimary)
+                            .frame(width: 8, height: 8)
+                            .pulseAnimation()
+                    }
+                }
+                
                 Text(prayer.arabicName)
                     .font(.system(size: 12))
                     .foregroundColor(.appMutedForeground)
@@ -201,7 +211,7 @@ struct PrayerRow: View {
 
             Spacer()
 
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 Text(prayer.time)
                     .font(.system(size: 14, weight: .medium))
                     .monospacedDigit()
@@ -216,12 +226,6 @@ struct PrayerRow: View {
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.green)
                     }
-                }
-                if prayer.isActive {
-                    Circle()
-                        .fill(Color.appPrimary)
-                        .frame(width: 8, height: 8)
-                        .pulseAnimation()
                 }
             }
         }

@@ -200,7 +200,6 @@ struct PrayerRow: View {
                         Circle()
                             .fill(Color.appPrimary)
                             .frame(width: 8, height: 8)
-                            .pulseAnimation()
                     }
                 }
                 

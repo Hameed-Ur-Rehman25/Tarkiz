@@ -191,17 +191,9 @@ struct PrayerRow: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(prayer.name)
-                        .font(.system(size: 16, weight: prayer.isActive ? .semibold : .medium))
-                        .foregroundColor(nameColor)
-                    
-                    if prayer.isActive {
-                        Circle()
-                            .fill(Color.appPrimary)
-                            .frame(width: 8, height: 8)
-                    }
-                }
+                Text(prayer.name)
+                    .font(.system(size: 16, weight: prayer.isActive ? .semibold : .medium))
+                    .foregroundColor(nameColor)
                 
                 Text(prayer.arabicName)
                     .font(.system(size: 12))
@@ -225,6 +217,12 @@ struct PrayerRow: View {
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.green)
                     }
+                }
+
+                if prayer.isActive {
+                    Circle()
+                        .fill(Color.appPrimary)
+                        .frame(width: 8, height: 8)
                 }
             }
         }

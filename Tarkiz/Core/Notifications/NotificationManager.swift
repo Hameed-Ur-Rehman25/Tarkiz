@@ -1,6 +1,7 @@
 import Foundation
 import UserNotifications
 import SwiftUI
+import Combine
 
 /// A simple manager to handle requesting user notification permissions.
 class NotificationManager: ObservableObject {

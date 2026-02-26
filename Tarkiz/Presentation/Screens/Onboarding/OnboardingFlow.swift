@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 import Combine
 
 // MARK: - Data Models (Onboarding specific)
@@ -239,6 +240,7 @@ private struct WelcomeStep: View {
 
 private struct LocationStep: View {
     @ObservedObject var vm: OnboardingFlowViewModel
+    @StateObject private var locationManager = LocationManager()
 
     let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
@@ -255,26 +257,30 @@ private struct LocationStep: View {
                 HStack { BackButton { vm.goBack() }; Spacer() }
                     .padding(.bottom, 12)
 
-                HStack(spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.appPrimary.opacity(0.15))
-                            .frame(width: 48, height: 48)
-                        Image(systemName: "location.fill")
-                            .foregroundColor(.appPrimary)
+                Button {
+                    locationManager.requestPermission()
+                } label: {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.appPrimary.opacity(0.15))
+                                .frame(width: 48, height: 48)
+                            Image(systemName: "location.fill")
+                                .foregroundColor(.appPrimary)
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Use My Location").font(.system(size: 15, weight: .medium)).foregroundColor(.appPrimary)
+                            Text("Auto-detect via GPS").font(.system(size: 12)).foregroundColor(.appPrimary.opacity(0.7))
+                        }
+                        Spacer()
                     }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Use My Location").font(.system(size: 15, weight: .medium)).foregroundColor(.appPrimary)
-                        Text("Auto-detect via GPS").font(.system(size: 12)).foregroundColor(.appPrimary.opacity(0.7))
-                    }
-                    Spacer()
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.appPrimary.opacity(0.08))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.appPrimary.opacity(0.2)))
+                    )
                 }
-                .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.appPrimary.opacity(0.08))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.appPrimary.opacity(0.2)))
-                )
                 .padding(.bottom, 12)
 
                 HStack(spacing: 8) {

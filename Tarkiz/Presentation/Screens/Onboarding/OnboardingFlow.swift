@@ -295,7 +295,8 @@ private struct NotificationStep: View {
             )
         }
         .ignoresSafeArea(edges: .bottom)
-        .onChange(of: notificationManager.authorizationStatus) { status in
+        .onChange(of: notificationManager.authorizationStatus) {
+            let status = notificationManager.authorizationStatus
             if status == .authorized || status == .denied || status == .provisional {
                 // Auto advance if they responded to the prompt
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

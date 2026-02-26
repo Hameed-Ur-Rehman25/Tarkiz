@@ -7,7 +7,7 @@ struct OnboardingView: View {
         if viewModel.showHome {
             // Navigate to main app content (placeholder for now)
             // In a real app, this would switch the root view controller or environment object
-            LoginView()
+            EmptyView()
         } else {
             ZStack {
                 AppTheme.backgroundColor.ignoresSafeArea()

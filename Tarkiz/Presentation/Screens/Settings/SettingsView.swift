@@ -6,7 +6,6 @@ import Combine
 class SettingsViewModel: ObservableObject {
     @Published var strictMode = false
     let emergencyUnlocksRemaining = 5
-    let userEmail = "user@example.com"
 }
 
 // MARK: - SettingsView
@@ -22,19 +21,6 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 16) {
-                        // Account
-                        SettingsSection {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Account")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.appForeground)
-                                Text("Signed in as \(viewModel.userEmail)")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.appMutedForeground)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-
                         // Share
                         SettingsSection {
                             VStack(alignment: .leading, spacing: 12) {

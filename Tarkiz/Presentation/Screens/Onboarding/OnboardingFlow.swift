@@ -62,7 +62,7 @@ private let onboardingDefaultApps: [OnboardingAppItem] = [
 // MARK: - ViewModel
 
 enum OnboardingStep: Int, CaseIterable {
-    case welcome, location, method, blocklist, nfc, complete
+    case welcome, notifications, location, method, blocklist, nfc, complete
 }
 
 enum NFCScanState {
@@ -125,12 +125,13 @@ struct OnboardingFlow: View {
     var body: some View {
         Group {
             switch vm.step {
-            case .welcome:   WelcomeStep(vm: vm, onSkip: onComplete)
-            case .location:  LocationStep(vm: vm)
-            case .method:    MethodStep(vm: vm)
-            case .blocklist: BlocklistStep(vm: vm)
-            case .nfc:       NFCStep(vm: vm)
-            case .complete:  CompleteStep(vm: vm, onFinish: onComplete)
+            case .welcome:       WelcomeStep(vm: vm, onSkip: onComplete)
+            case .notifications: NotificationStep(vm: vm)
+            case .location:      LocationStep(vm: vm)
+            case .method:        MethodStep(vm: vm)
+            case .blocklist:     BlocklistStep(vm: vm)
+            case .nfc:           NFCStep(vm: vm)
+            case .complete:      CompleteStep(vm: vm, onFinish: onComplete)
             }
         }
         .transition(.opacity)
@@ -234,6 +235,76 @@ private struct WelcomeStep: View {
     }
 }
 
+// MARK: - Step 2: Notifications
+
+private struct NotificationStep: View {
+    @ObservedObject var vm: OnboardingFlowViewModel
+    @StateObject private var notificationManager = NotificationManager()
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text("Never miss a\nprayer")
+                .font(.system(size: 32, weight: .semibold))
+                .multilineTextAlignment(.center)
+                .foregroundColor(.appForeground)
+                .padding(.top, 60)
+                .padding(.bottom, 24)
+
+            VStack(spacing: 0) {
+                HStack { BackButton { vm.goBack() }; Spacer() }
+                    .padding(.bottom, 12)
+
+                Button {
+                    notificationManager.requestPermission()
+                } label: {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.appPrimary.opacity(0.15))
+                                .frame(width: 48, height: 48)
+                            Image(systemName: "bell.badge.fill")
+                                .foregroundColor(.appPrimary)
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Allow Notifications").font(.system(size: 15, weight: .medium)).foregroundColor(.appPrimary)
+                            Text("Get reminded at prayer times").font(.system(size: 12)).foregroundColor(.appPrimary.opacity(0.7))
+                        }
+                        Spacer()
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.appPrimary.opacity(0.08))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.appPrimary.opacity(0.2)))
+                    )
+                }
+                .padding(.bottom, 12)
+
+                Spacer()
+                
+                OnboardingPrimaryButton(title: "Continue") { vm.advance() }
+            }
+            .padding(.horizontal, 32)
+            .padding(.top, 36)
+            .padding(.bottom, 52)
+            .background(
+                RoundedCornerShape(radius: 40, corners: [.topLeft, .topRight])
+                    .fill(Color.appCard)
+                    .ignoresSafeArea(edges: .bottom)
+                    .shadow(color: .black.opacity(0.06), radius: 20, y: -5)
+            )
+        }
+        .ignoresSafeArea(edges: .bottom)
+        .onChange(of: notificationManager.authorizationStatus) { status in
+            if status == .authorized || status == .denied || status == .provisional {
+                // Auto advance if they responded to the prompt
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    vm.advance()
+                }
+            }
+        }
+    }
+}
 
 
 // MARK: - Step 2: Location

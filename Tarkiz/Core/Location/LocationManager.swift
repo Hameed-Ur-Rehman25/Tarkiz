@@ -1,6 +1,7 @@
 import Foundation
 import CoreLocation
 import SwiftUI
+import Combine
 
 /// A simple manager to handle requesting location permissions.
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {

@@ -21,10 +21,11 @@ class NotificationManager: ObservableObject {
     }
 
     /// Requests standard alert, sound, and badge permissions.
-    func requestPermission() {
+    func requestPermission(completion: @escaping (Bool) -> Void = { _ in }) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             DispatchQueue.main.async {
                 self.checkStatus()
+                completion(granted)
             }
         }
     }

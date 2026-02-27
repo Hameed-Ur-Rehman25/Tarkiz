@@ -301,7 +301,9 @@ private struct PermissionsStep: View {
                 Spacer()
                 
                 Button(action: {
-                    notificationManager.requestPermission()
+                    notificationManager.requestPermission { _ in
+                        vm.advance()
+                    }
                 }) {
                     Text("Enable & Continue")
                         .font(.system(size: 16, weight: .semibold))
@@ -325,15 +327,6 @@ private struct PermissionsStep: View {
             )
         }
         .ignoresSafeArea(edges: .bottom)
-        .onChange(of: notificationManager.authorizationStatus) {
-            let status = notificationManager.authorizationStatus
-            if status == .authorized || status == .denied || status == .provisional {
-                // Auto advance if they responded to the prompt
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    vm.advance()
-                }
-            }
-        }
     }
 }
 

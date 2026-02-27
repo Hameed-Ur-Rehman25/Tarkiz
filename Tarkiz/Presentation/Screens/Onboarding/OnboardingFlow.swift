@@ -126,7 +126,7 @@ struct OnboardingFlow: View {
         Group {
             switch vm.step {
             case .welcome:       WelcomeStep(vm: vm, onSkip: onComplete)
-            case .notifications: NotificationStep(vm: vm)
+            case .notifications: PermissionsStep(vm: vm)
             case .location:      LocationStep(vm: vm)
             case .method:        MethodStep(vm: vm)
             case .blocklist:     BlocklistStep(vm: vm)
@@ -235,15 +235,15 @@ private struct WelcomeStep: View {
     }
 }
 
-// MARK: - Step 2: Notifications
+// MARK: - Step 2: Permissions (Notifications & Background)
 
-private struct NotificationStep: View {
+private struct PermissionsStep: View {
     @ObservedObject var vm: OnboardingFlowViewModel
     @StateObject private var notificationManager = NotificationManager()
 
     var body: some View {
         VStack(spacing: 0) {
-            Text("Never miss a\nprayer")
+            Text("Stay Updated\n& Accurate")
                 .font(.system(size: 32, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .foregroundColor(.appForeground)
@@ -254,35 +254,65 @@ private struct NotificationStep: View {
                 HStack { BackButton { vm.goBack() }; Spacer() }
                     .padding(.bottom, 12)
 
-                Button {
-                    notificationManager.requestPermission()
-                } label: {
-                    HStack(spacing: 12) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.appPrimary.opacity(0.15))
-                                .frame(width: 48, height: 48)
-                            Image(systemName: "bell.badge.fill")
-                                .foregroundColor(.appPrimary)
-                        }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Allow Notifications").font(.system(size: 15, weight: .medium)).foregroundColor(.appPrimary)
-                            Text("Get reminded at prayer times").font(.system(size: 12)).foregroundColor(.appPrimary.opacity(0.7))
-                        }
-                        Spacer()
+                // Notifications Card
+                HStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.appPrimary.opacity(0.15))
+                            .frame(width: 48, height: 48)
+                        Image(systemName: "bell.badge.fill")
+                            .foregroundColor(.appPrimary)
                     }
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.appPrimary.opacity(0.08))
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.appPrimary.opacity(0.2)))
-                    )
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Notifications").font(.system(size: 15, weight: .medium)).foregroundColor(.appForeground)
+                        Text("Get timely reminders for prayers").font(.system(size: 12)).foregroundColor(.appMutedForeground)
+                    }
+                    Spacer()
                 }
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.appSecondary.opacity(0.3))
+                )
+                .padding(.bottom, 12)
+
+                // Background Activity Card
+                HStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.appPrimary.opacity(0.15))
+                            .frame(width: 48, height: 48)
+                        Image(systemName: "arrow.clockwise.circle.fill")
+                            .foregroundColor(.appPrimary)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Background Activity").font(.system(size: 15, weight: .medium)).foregroundColor(.appForeground)
+                        Text("Keep prayer times synced silently").font(.system(size: 12)).foregroundColor(.appMutedForeground)
+                    }
+                    Spacer()
+                }
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.appSecondary.opacity(0.3))
+                )
                 .padding(.bottom, 12)
 
                 Spacer()
                 
-                OnboardingPrimaryButton(title: "Continue") { vm.advance() }
+                Button(action: {
+                    notificationManager.requestPermission()
+                }) {
+                    Text("Enable & Continue")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.appPrimary)
+                        )
+                }
             }
             .padding(.horizontal, 32)
             .padding(.top, 36)
@@ -329,31 +359,66 @@ private struct LocationStep: View {
                 HStack { BackButton { vm.goBack() }; Spacer() }
                     .padding(.bottom, 12)
 
-                Button {
-                    locationManager.requestPermission()
-                } label: {
-                    HStack(spacing: 12) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.appPrimary.opacity(0.15))
-                                .frame(width: 48, height: 48)
-                            Image(systemName: "location.fill")
-                                .foregroundColor(.appPrimary)
+                VStack(spacing: 0) {
+                    if let city = locationManager.fetchedCity, let country = locationManager.fetchedCountry {
+                        // Display fetched location visually similar to list items
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 6) {
+                                Text("📍").font(.system(size: 18))
+                                Text(city).font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.white)
+                            }
+                            Text(country).font(.system(size: 12))
+                                .foregroundColor(.white.opacity(0.7))
                         }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Use My Location").font(.system(size: 15, weight: .medium)).foregroundColor(.appPrimary)
-                            Text("Auto-detect via GPS").font(.system(size: 12)).foregroundColor(.appPrimary.opacity(0.7))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.appPrimary)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.appPrimary, lineWidth: 2)
+                        )
+                    } else {
+                        Button {
+                            locationManager.requestPermission()
+                        } label: {
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.appPrimary.opacity(0.15))
+                                        .frame(width: 48, height: 48)
+                                    if locationManager.isFetching {
+                                        ProgressView().tint(.appPrimary)
+                                    } else {
+                                        Image(systemName: "location.fill")
+                                            .foregroundColor(.appPrimary)
+                                    }
+                                }
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Use My Location").font(.system(size: 15, weight: .medium)).foregroundColor(.appPrimary)
+                                    Text("Auto-detect via GPS").font(.system(size: 12)).foregroundColor(.appPrimary.opacity(0.7))
+                                }
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.appPrimary.opacity(0.08))
+                                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.appPrimary.opacity(0.2)))
+                            )
                         }
-                        Spacer()
+                        .disabled(locationManager.isFetching)
                     }
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.appPrimary.opacity(0.08))
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.appPrimary.opacity(0.2)))
-                    )
                 }
                 .padding(.bottom, 12)
+                .onChange(of: locationManager.fetchedCity) {
+                    if let city = locationManager.fetchedCity, let country = locationManager.fetchedCountry {
+                        vm.selectLocation(OnboardingLocationOption(city: city, country: country, flag: "📍"))
+                    }
+                }
 
                 HStack(spacing: 8) {
                     Rectangle().fill(Color.appBorder).frame(height: 1)

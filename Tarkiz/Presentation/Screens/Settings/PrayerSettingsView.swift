@@ -5,28 +5,96 @@ import CoreLocation
 // MARK: - PrayerSettingsViewModel
 
 class PrayerSettingsViewModel: ObservableObject {
-    @Published var selectedLocation: String = "New York, USA"
-    @Published var selectedMethod: String = "Muslim World League"
+    private let settings = UserSettings.shared
+    private let locationManager = LocationManager()
+    private var cancellables = Set<AnyCancellable>()
+
+    // Location
+    @Published var locationDisplay: String = ""
+    @Published var isDetectingLocation: Bool = false
+
+    // Method
+    @Published var selectedMethodId: Int = 3
+
+    // Asr juristic school (0 = Shafi'i, 1 = Hanafi)
+    @Published var asrJuristic: Int = 0
+
+    // Time adjustments
     @Published var fajrAdjust: Int = 0
     @Published var dhuhrAdjust: Int = 0
     @Published var asrAdjust: Int = 0
     @Published var maghribAdjust: Int = 0
     @Published var ishaAdjust: Int = 0
-    @Published var asrStandard: String = "Shafi'i"
 
-    let methods = [
-        "Muslim World League",
-        "ISNA",
-        "Egyptian General Authority",
-        "Umm al-Qura",
-        "University of Karachi",
-    ]
-
+    let methods: [CalculationMethod] = allCalculationMethods
     let asrStandards = ["Shafi'i", "Hanafi"]
 
+    init() {
+        loadFromSettings()
+        observeLocation()
+    }
+
+    // MARK: - Load
+
+    func loadFromSettings() {
+        locationDisplay  = settings.locationCity.isEmpty
+                             ? "Not set"
+                             : "\(settings.locationCity), \(settings.locationCountry)"
+        selectedMethodId = settings.calculationMethodId
+        asrJuristic      = settings.asrJuristic
+        fajrAdjust       = settings.fajrAdjust
+        dhuhrAdjust      = settings.dhuhrAdjust
+        asrAdjust        = settings.asrAdjust
+        maghribAdjust    = settings.maghribAdjust
+        ishaAdjust       = settings.ishaAdjust
+    }
+
+    // MARK: - Save
+
+    func saveSettings() {
+        if let method = methods.first(where: { $0.id == selectedMethodId }) {
+            settings.calculationMethodId   = method.id
+            settings.calculationMethodName = method.name
+        }
+        settings.asrJuristic   = asrJuristic
+        settings.fajrAdjust    = fajrAdjust
+        settings.dhuhrAdjust   = dhuhrAdjust
+        settings.asrAdjust     = asrAdjust
+        settings.maghribAdjust = maghribAdjust
+        settings.ishaAdjust    = ishaAdjust
+        // Bust cache so Prayer Times screen re-fetches with new settings
+        DIContainer.shared.prayerTimesRepository.invalidateCache()
+    }
+
+    // MARK: - Detect Location
+
     func detectLocation() {
-        // In a real app, use LocationManager + CLGeocoder
-        selectedLocation = "New York, USA"
+        isDetectingLocation = true
+        locationManager.requestPermission()
+    }
+
+    private func observeLocation() {
+        // When GPS resolves, save to UserSettings
+        locationManager.$fetchedCity
+            .compactMap { $0 }
+            .combineLatest(
+                locationManager.$fetchedCountry.compactMap { $0 },
+                locationManager.$latitude.compactMap { $0 },
+                locationManager.$longitude.compactMap { $0 }
+            )
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] city, country, lat, lon in
+                guard let self else { return }
+                self.settings.locationCity    = city
+                self.settings.locationCountry = country
+                self.settings.latitude        = lat
+                self.settings.longitude       = lon
+                self.locationDisplay          = "\(city), \(country)"
+                self.isDetectingLocation      = false
+                // Bust cache so Prayer Times re-fetches
+                DIContainer.shared.prayerTimesRepository.invalidateCache()
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -65,7 +133,7 @@ struct PrayerSettingsView: View {
                         .padding(.horizontal, 20)
                         .padding(.bottom, 16)
 
-                        // Location Section
+        // Location Section
                         SettingsSection {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Location")
@@ -75,16 +143,22 @@ struct PrayerSettingsView: View {
                                 HStack {
                                     Image(systemName: "mappin.and.ellipse")
                                         .foregroundColor(.appPrimary)
-                                    Text(viewModel.selectedLocation)
+                                    Text(viewModel.locationDisplay)
                                         .font(.system(size: 15))
                                         .foregroundColor(.appForeground)
                                     Spacer()
                                 }
 
-                                Button { viewModel.detectLocation() } label: {
+                                Button {
+                                    viewModel.detectLocation()
+                                } label: {
                                     HStack(spacing: 8) {
-                                        Image(systemName: "location.fill")
-                                        Text("Detect Location")
+                                        if viewModel.isDetectingLocation {
+                                            ProgressView().tint(.appPrimary)
+                                        } else {
+                                            Image(systemName: "location.fill")
+                                        }
+                                        Text(viewModel.isDetectingLocation ? "Detecting..." : "Detect Location")
                                     }
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundColor(.appPrimary)
@@ -93,6 +167,7 @@ struct PrayerSettingsView: View {
                                     .background(Color.appPrimary.opacity(0.1))
                                     .clipShape(RoundedRectangle(cornerRadius: 14))
                                 }
+                                .disabled(viewModel.isDetectingLocation)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -105,14 +180,19 @@ struct PrayerSettingsView: View {
                                     .foregroundColor(.appForeground)
 
                                 VStack(spacing: 8) {
-                                    ForEach(viewModel.methods, id: \.self) { method in
-                                        Button { viewModel.selectedMethod = method } label: {
+                                    ForEach(viewModel.methods) { method in
+                                        Button { viewModel.selectedMethodId = method.id } label: {
                                             HStack {
-                                                Text(method)
-                                                    .font(.system(size: 14))
-                                                    .foregroundColor(viewModel.selectedMethod == method ? .appPrimary : .appForeground)
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(method.name)
+                                                        .font(.system(size: 14))
+                                                        .foregroundColor(viewModel.selectedMethodId == method.id ? .appPrimary : .appForeground)
+                                                    Text(method.region)
+                                                        .font(.system(size: 11))
+                                                        .foregroundColor(.appMutedForeground)
+                                                }
                                                 Spacer()
-                                                if viewModel.selectedMethod == method {
+                                                if viewModel.selectedMethodId == method.id {
                                                     Image(systemName: "checkmark.circle.fill")
                                                         .foregroundColor(.appPrimary)
                                                 }
@@ -120,7 +200,7 @@ struct PrayerSettingsView: View {
                                             .padding(12)
                                             .background(
                                                 RoundedRectangle(cornerRadius: 14)
-                                                    .fill(viewModel.selectedMethod == method ? Color.appPrimary.opacity(0.08) : Color.appSecondary.opacity(0.5))
+                                                    .fill(viewModel.selectedMethodId == method.id ? Color.appPrimary.opacity(0.08) : Color.appSecondary.opacity(0.5))
                                             )
                                         }
                                     }
@@ -137,14 +217,14 @@ struct PrayerSettingsView: View {
                                     .foregroundColor(.appForeground)
 
                                 HStack(spacing: 8) {
-                                    ForEach(viewModel.asrStandards, id: \.self) { standard in
-                                        Button { viewModel.asrStandard = standard } label: {
+                                    ForEach(Array(viewModel.asrStandards.enumerated()), id: \.offset) { idx, standard in
+                                        Button { viewModel.asrJuristic = idx } label: {
                                             Text(standard)
                                                 .font(.system(size: 14, weight: .medium))
-                                                .foregroundColor(viewModel.asrStandard == standard ? .white : .appForeground)
+                                                .foregroundColor(viewModel.asrJuristic == idx ? .white : .appForeground)
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 10)
-                                                .background(viewModel.asrStandard == standard ? Color.appPrimary : Color.appSecondary.opacity(0.5))
+                                                .background(viewModel.asrJuristic == idx ? Color.appPrimary : Color.appSecondary.opacity(0.5))
                                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                         }
                                     }
@@ -188,6 +268,9 @@ struct PrayerSettingsView: View {
             }
         }
         .navigationBarHidden(true)
+        .onDisappear {
+            viewModel.saveSettings()
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import CoreLocation
 
 // MARK: - Data Model
 
@@ -7,7 +8,7 @@ struct Prayer: Identifiable {
     let id = UUID()
     let name: String
     let arabicName: String
-    let time: String
+    let time: String          // Display string e.g. "05:15"
     let icon: String
     var isActive: Bool = false
     var isPassed: Bool = false
@@ -15,23 +16,179 @@ struct Prayer: Identifiable {
 
 // MARK: - PrayerTimesViewModel
 
+@MainActor
 class PrayerTimesViewModel: ObservableObject {
-    @Published var prayers: [Prayer] = [
-        Prayer(name: "Fajr",    arabicName: "الفجر",   time: "5:12 AM",  icon: "moon.fill",          isPassed: true),
-        Prayer(name: "Sunrise", arabicName: "الشروق",  time: "6:45 AM",  icon: "sunrise.fill",       isPassed: true),
-        Prayer(name: "Dhuhr",   arabicName: "الظهر",   time: "12:30 PM", icon: "sun.max.fill",       isActive: true),
-        Prayer(name: "Asr",     arabicName: "العصر",   time: "3:45 PM",  icon: "cloud.sun.fill"),
-        Prayer(name: "Maghrib", arabicName: "المغرب",  time: "6:15 PM",  icon: "sunset.fill"),
-        Prayer(name: "Isha",    arabicName: "العشاء",  time: "7:45 PM",  icon: "sparkles"),
-    ]
+
+    @Published var prayers: [Prayer] = []
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String?
+    @Published var hijriDate: String = ""
+    @Published var locationDisplay: String = ""
+    @Published var methodDisplay: String = ""
+
+    private let repository: PrayerTimesRepository
+    private let settings: UserSettings
+
+    init(
+        repository: PrayerTimesRepository = DIContainer.shared.prayerTimesRepository,
+        settings: UserSettings = .shared
+    ) {
+        self.repository = repository
+        self.settings   = settings
+    }
 
     var activePrayer: Prayer? { prayers.first { $0.isActive } }
-    var nextPrayer: Prayer? { prayers.first { !$0.isPassed && !$0.isActive } }
+    var nextPrayer:   Prayer? { prayers.first { !$0.isPassed && !$0.isActive } }
 
     var formattedDate: String {
         let f = DateFormatter()
         f.dateFormat = "EEEE, MMMM d"
         return f.string(from: Date()).uppercased()
+    }
+
+    // MARK: - Fetch
+
+    func loadPrayerTimes() async {
+        guard settings.hasLocation else {
+            // No location set yet — show empty state
+            errorMessage = "Location not set. Please complete setup in Settings."
+            return
+        }
+
+        isLoading    = true
+        errorMessage = nil
+
+        do {
+            let response = try await repository.fetchTodayTimings(
+                lat:      settings.latitude,
+                lon:      settings.longitude,
+                methodId: settings.calculationMethodId
+            )
+            applyResponse(response)
+        } catch {
+            errorMessage = "Could not load prayer times.\n\(error.localizedDescription)"
+        }
+
+        isLoading = false
+    }
+
+    // MARK: - Apply Response
+
+    private func applyResponse(_ response: PrayerTimesResponse) {
+        let t       = response.data.timings
+        let hijri   = response.data.date.hijri
+        let tz      = response.data.meta.timezone
+
+        hijriDate       = "\(hijri.date.components(separatedBy: "-").first ?? "") \(hijri.month.en) \(hijri.year)"
+        locationDisplay = settings.locationCity.isEmpty
+                            ? "" : "\(settings.locationCity), \(settings.locationCountry)"
+        methodDisplay   = settings.calculationMethodName
+
+        // Build raw list with adjustments applied
+        let raw: [(name: String, arabicName: String, rawTime: String, icon: String)] = [
+            ("Fajr",    "الفجر",  t.Fajr,    "moon.fill"),
+            ("Sunrise", "الشروق", t.Sunrise, "sunrise.fill"),
+            ("Dhuhr",   "الظهر",  t.Dhuhr,   "sun.max.fill"),
+            ("Asr",     "العصر",  t.Asr,     "cloud.sun.fill"),
+            ("Maghrib", "المغرب", t.Maghrib,  "sunset.fill"),
+            ("Isha",    "العشاء", t.Isha,     "sparkles"),
+        ]
+
+        let adjustments = [
+            settings.fajrAdjust, 0,
+            settings.dhuhrAdjust, settings.asrAdjust,
+            settings.maghribAdjust, settings.ishaAdjust,
+        ]
+
+        let now = Date()
+
+        prayers = raw.enumerated().map { idx, entry in
+            let displayTime = applyAdjustment(
+                rawTime: entry.rawTime,
+                minutes: adjustments[idx],
+                timezone: tz
+            )
+            let prayerDate = prayerDate(from: entry.rawTime, timezone: tz)
+
+            return Prayer(
+                name:       entry.name,
+                arabicName: entry.arabicName,
+                time:       displayTime,
+                icon:       entry.icon,
+                isActive:   false,
+                isPassed:   prayerDate != nil && prayerDate! < now
+            )
+        }
+
+        // Mark the current active prayer (last passed one that isn't Sunrise)
+        markActivePrayer()
+    }
+
+    private func markActivePrayer() {
+        // Find the last prayer whose time has passed (excluding Sunrise as an "active" slot)
+        var lastPassedIdx: Int? = nil
+        for (idx, prayer) in prayers.enumerated() {
+            if prayer.isPassed && prayer.name != "Sunrise" {
+                lastPassedIdx = idx
+            }
+        }
+
+        // The active prayer is the one whose time has passed but the next one hasn't yet
+        if let passedIdx = lastPassedIdx {
+            let nextIdx = passedIdx + 1
+            if nextIdx < prayers.count {
+                // If next prayer hasn't passed either, lastPassed is active
+                prayers[passedIdx].isActive = true
+                prayers[passedIdx].isPassed = false
+            }
+        } else {
+            // Before Fajr — Isha from yesterday would be active, show nothing active
+        }
+    }
+
+    // MARK: - Time Helpers
+
+    private func applyAdjustment(rawTime: String, minutes: Int, timezone: String) -> String {
+        guard let date = prayerDate(from: rawTime, timezone: timezone) else { return rawTime }
+        let adjusted = date.addingTimeInterval(TimeInterval(minutes * 60))
+
+        let f = DateFormatter()
+        f.dateFormat  = "hh:mm a"
+        f.amSymbol    = "AM"
+        f.pmSymbol    = "PM"
+        f.timeZone    = TimeZone(identifier: timezone) ?? .current
+        return f.string(from: adjusted)
+    }
+
+    private func prayerDate(from rawTime: String, timezone: String) -> Date? {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        f.timeZone   = TimeZone(identifier: timezone) ?? .current
+
+        // Combine today's date with the API time string
+        let cal  = Calendar.current
+        let today = cal.dateComponents(in: TimeZone(identifier: timezone) ?? .current, from: Date())
+        var comps = DateComponents()
+        comps.year   = today.year
+        comps.month  = today.month
+        comps.day    = today.day
+        comps.timeZone = TimeZone(identifier: timezone) ?? .current
+
+        let parts = rawTime.components(separatedBy: ":")
+        guard parts.count >= 2,
+              let hour = Int(parts[0]),
+              let min  = Int(parts[1].prefix(2)) else { return nil }
+        comps.hour   = hour
+        comps.minute = min
+        comps.second = 0
+        return cal.date(from: comps)
+    }
+
+    // MARK: - Invalidate on Settings Change
+
+    func refreshIfNeeded() async {
+        repository.invalidateCache()
+        await loadPrayerTimes()
     }
 }
 
@@ -56,24 +213,47 @@ struct PrayerTimesView: View {
                             Text("Prayer Times")
                                 .font(.system(size: 20, weight: .semibold))
                                 .foregroundColor(.appForeground)
+                            if !viewModel.hijriDate.isEmpty {
+                                Text(viewModel.hijriDate)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.appMutedForeground)
+                            }
                         }
                         .padding(.top, 32)
                         .padding(.bottom, 8)
 
-                        // Current Prayer Card
-                        if let active = viewModel.activePrayer {
-                            CurrentPrayerCard(prayer: active, nextPrayer: viewModel.nextPrayer)
-                                .padding(.horizontal, 16)
-                        }
-
-                        // Prayer List
-                        PrayerListCard(prayers: viewModel.prayers)
+                        // Loading / Error / Content
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .tint(.appPrimary)
+                                .scaleEffect(1.3)
+                                .padding(.vertical, 48)
+                        } else if let error = viewModel.errorMessage {
+                            ErrorBanner(message: error) {
+                                Task { await viewModel.loadPrayerTimes() }
+                            }
                             .padding(.horizontal, 16)
+                        } else {
+                            // Current Prayer Card
+                            if let active = viewModel.activePrayer {
+                                CurrentPrayerCard(prayer: active, nextPrayer: viewModel.nextPrayer)
+                                    .padding(.horizontal, 16)
+                            }
 
-                        // Location
-                        PrayerLocationCard()
+                            // Prayer List
+                            if !viewModel.prayers.isEmpty {
+                                PrayerListCard(prayers: viewModel.prayers)
+                                    .padding(.horizontal, 16)
+                            }
+
+                            // Location
+                            PrayerLocationCard(
+                                city:   viewModel.locationDisplay,
+                                method: viewModel.methodDisplay
+                            )
                             .padding(.horizontal, 16)
                             .padding(.bottom, 32)
+                        }
                     }
                 }
                 .background(Color.appCard)
@@ -84,6 +264,38 @@ struct PrayerTimesView: View {
                 .padding(.bottom, 64)
             }
         }
+        .task { await viewModel.loadPrayerTimes() }
+    }
+}
+
+// MARK: - Error Banner
+
+struct ErrorBanner: View {
+    let message: String
+    let retry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 32))
+                .foregroundColor(.orange)
+            Text(message)
+                .font(.system(size: 14))
+                .foregroundColor(.appMutedForeground)
+                .multilineTextAlignment(.center)
+            Button(action: retry) {
+                Text("Retry")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 10)
+                    .background(Color.appPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+        }
+        .padding(24)
+        .background(Color.appSecondary.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 
@@ -194,7 +406,7 @@ struct PrayerRow: View {
                 Text(prayer.name)
                     .font(.system(size: 16, weight: prayer.isActive ? .semibold : .medium))
                     .foregroundColor(nameColor)
-                
+
                 Text(prayer.arabicName)
                     .font(.system(size: 12))
                     .foregroundColor(.appMutedForeground)
@@ -235,6 +447,9 @@ struct PrayerRow: View {
 // MARK: - Location Card
 
 struct PrayerLocationCard: View {
+    let city: String
+    let method: String
+
     var body: some View {
         HStack(spacing: 12) {
             ZStack {
@@ -247,10 +462,10 @@ struct PrayerLocationCard: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("New York, USA")
+                Text(city.isEmpty ? "Location not set" : city)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.appForeground)
-                Text("Muslim World League")
+                Text(method.isEmpty ? "—" : method)
                     .font(.system(size: 12))
                     .foregroundColor(.appMutedForeground)
             }

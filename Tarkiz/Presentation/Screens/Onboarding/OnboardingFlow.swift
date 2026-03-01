@@ -29,6 +29,15 @@ struct OnboardingAppItem: Identifiable {
 
 // MARK: - Static Data
 
+// Maps onboarding method IDs to AlAdhan integer method IDs
+private let methodIdMap: [String: Int] = [
+    "mwl":     3,
+    "isna":    2,
+    "egypt":   5,
+    "makkah":  4,
+    "karachi": 1,
+]
+
 private let onboardingCalculationMethods: [OnboardingCalculationMethod] = [
     .init(id: "mwl",     name: "Muslim World League",         description: "Fajr: 18°, Isha: 17°",    region: "Europe, Far East"),
     .init(id: "isna",    name: "ISNA",                        description: "Fajr: 15°, Isha: 15°",    region: "North America"),
@@ -76,6 +85,10 @@ class OnboardingFlowViewModel: ObservableObject {
     @Published var apps: [OnboardingAppItem] = onboardingDefaultApps
     @Published var nfcState: NFCScanState = .idle
 
+    // Coordinates set either via GPS or geocoding a preset city
+    var selectedLatitude: Double?
+    var selectedLongitude: Double?
+
     var blockedCount: Int { apps.filter(\.blocked).count }
 
     func toggleApp(_ id: String) {
@@ -88,6 +101,14 @@ class OnboardingFlowViewModel: ObservableObject {
     func selectLocation(_ loc: OnboardingLocationOption) {
         Haptics.impact(.light)
         selectedLocation = loc
+        // Geocode preset city to get lat/lon
+        geocodeCity(loc.city, country: loc.country)
+    }
+
+    func setGPSLocation(city: String, country: String, lat: Double, lon: Double) {
+        selectedLocation = OnboardingLocationOption(city: city, country: country, flag: "📍")
+        selectedLatitude  = lat
+        selectedLongitude = lon
     }
 
     func selectMethod(_ m: OnboardingCalculationMethod) {
@@ -112,6 +133,37 @@ class OnboardingFlowViewModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
             Haptics.notification(.success)
             self?.nfcState = .success
+        }
+    }
+
+    /// Persist all onboarding choices to UserSettings so the app can use them.
+    func saveSettingsAndComplete() {
+        let settings = UserSettings.shared
+        if let loc = selectedLocation {
+            settings.locationCity    = loc.city
+            settings.locationCountry = loc.country
+        }
+        if let lat = selectedLatitude  { settings.latitude  = lat }
+        if let lon = selectedLongitude { settings.longitude = lon }
+        if let method = selectedMethod {
+            settings.calculationMethodName = method.name
+            settings.calculationMethodId   = methodIdMap[method.id] ?? 3
+        }
+        settings.hasCompletedOnboarding = true
+        // Invalidate the prayer times cache so fresh data is fetched
+        DIContainer.shared.prayerTimesRepository.invalidateCache()
+    }
+
+    // MARK: - Private
+
+    private func geocodeCity(_ city: String, country: String) {
+        let geocoder = CLGeocoder()
+        geocoder.geocodeAddressString("\(city), \(country)") { [weak self] placemarks, _ in
+            guard let coord = placemarks?.first?.location?.coordinate else { return }
+            DispatchQueue.main.async {
+                self?.selectedLatitude  = coord.latitude
+                self?.selectedLongitude = coord.longitude
+            }
         }
     }
 }
@@ -408,8 +460,11 @@ private struct LocationStep: View {
                 }
                 .padding(.bottom, 12)
                 .onChange(of: locationManager.fetchedCity) {
-                    if let city = locationManager.fetchedCity, let country = locationManager.fetchedCountry {
-                        vm.selectLocation(OnboardingLocationOption(city: city, country: country, flag: "📍"))
+                    if let city = locationManager.fetchedCity,
+                       let country = locationManager.fetchedCountry,
+                       let lat = locationManager.latitude,
+                       let lon = locationManager.longitude {
+                        vm.setGPSLocation(city: city, country: country, lat: lat, lon: lon)
                     }
                 }
 
@@ -835,7 +890,10 @@ private struct CompleteStep: View {
 
             Spacer()
 
-            OnboardingPrimaryButton(title: "Start Using Tarkiz") { onFinish() }
+            OnboardingPrimaryButton(title: "Start Using Tarkiz") {
+                vm.saveSettingsAndComplete()
+                onFinish()
+            }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 40)
         }

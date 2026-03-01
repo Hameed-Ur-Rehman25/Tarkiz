@@ -8,13 +8,10 @@ class DIContainer {
     
     lazy var keychainService: KeychainService = KeychainServiceImpl()
     
-    // Repositories (Placeholders for now)
-    // func makeUserRepository() -> UserRepository {
-    //     UserRepositoryImpl(
-    //         networkService: networkService,
-    //         keychainService: keychainService
-    //     )
-    // }
+    // Repositories
+    lazy var prayerTimesRepository: PrayerTimesRepository = PrayerTimesRepositoryImpl(
+        networkService: networkService
+    )
     
     private init() {}
 }

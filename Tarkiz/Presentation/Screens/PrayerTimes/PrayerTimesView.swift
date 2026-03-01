@@ -336,46 +336,65 @@ struct CurrentPrayerCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
+            HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("CURRENT PRAYER")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.appPrimary)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(Color(red: 0.27, green: 0.58, blue: 0.43)) // Custom green
+                        .tracking(0.5)
+                        .padding(.bottom, 4)
+                        
                     Text(prayer.name)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.appForeground)
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
+                        
                     Text(prayer.arabicName)
-                        .font(.system(size: 14))
-                        .foregroundColor(.appMutedForeground)
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5)) // Custom gray
                 }
+                
                 Spacer()
-                VStack(alignment: .trailing, spacing: 8) {
+                
+                VStack(alignment: .trailing, spacing: 20) {
                     ZStack {
                         Circle()
-                            .fill(Color.appPrimary.opacity(0.1))
-                            .frame(width: 48, height: 48)
+                            .fill(Color(red: 0.88, green: 0.9, blue: 0.89)) // Icon bg green
+                            .frame(width: 56, height: 56)
                         Image(systemName: prayer.icon)
-                            .font(.system(size: 22))
-                            .foregroundColor(.appPrimary)
+                            .font(.system(size: 24, weight: .regular))
+                            .foregroundColor(Color(red: 0.35, green: 0.6, blue: 0.45))
                     }
+                    
                     Text(prayer.time)
-                        .font(.system(size: 18, weight: .semibold))
-                        .monospacedDigit()
-                        .foregroundColor(.appForeground)
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                 }
             }
+            .padding(.bottom, 16)
 
             if let next = nextPrayer {
                 Divider()
-                    .background(Color.appPrimary.opacity(0.2))
-                    .padding(.top, 16)
-                Text("Next: \(Text(next.name).fontWeight(.medium).foregroundColor(.appForeground)) at \(next.time)")
-                    .font(.system(size: 14))
-                    .foregroundColor(.appMutedForeground)
+                    .background(Color.black.opacity(0.1))
+                    .padding(.bottom, 16)
+                    
+                HStack(spacing: 4) {
+                    Text("Next:")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5))
+                        
+                    Text(next.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
+                        
+                    Text("at \(next.time)")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5))
+                }
             }
         }
-        .padding(20)
-        .background(Color.appPrimary.opacity(0.1))
+        .padding(.horizontal, 24)
+        .padding(.vertical, 24)
+        .background(Color(red: 0.91, green: 0.92, blue: 0.91)) // Card bg
         .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 }
@@ -448,21 +467,31 @@ struct PrayerRow: View {
     let prayer: Prayer
 
     var iconBackground: Color {
-        if prayer.isPassed { return .appMuted }
-        if prayer.isActive { return .appPrimary.opacity(0.1) }
-        return .appSecondary
+        if prayer.isActive {
+            return Color(red: 0.88, green: 0.9, blue: 0.89) // active green bg
+        }
+        return Color(red: 0.89, green: 0.89, blue: 0.89) // inactive gray bg
     }
 
     var iconColor: Color {
-        if prayer.isPassed { return .appMutedForeground }
-        if prayer.isActive { return .appPrimary }
-        return .appForeground
+        if prayer.isActive {
+            return Color(red: 0.35, green: 0.6, blue: 0.45) // active green icon
+        }
+        return Color(red: 0.35, green: 0.38, blue: 0.42) // inactive dark gray icon
     }
 
     var nameColor: Color {
-        if prayer.isPassed { return .appMutedForeground }
-        if prayer.isActive { return .appPrimary }
-        return .appForeground
+        if prayer.isActive {
+            return Color(red: 0.35, green: 0.6, blue: 0.45) // active green text
+        }
+        return Color(red: 0.2, green: 0.22, blue: 0.28) // deep gray text
+    }
+
+    var rowBackgroundColor: Color {
+        if prayer.isActive {
+            return Color(red: 0.91, green: 0.92, blue: 0.91) // active card bg
+        }
+        return Color(red: 0.95, green: 0.94, blue: 0.94) // list card bg
     }
 
     var body: some View {
@@ -470,51 +499,56 @@ struct PrayerRow: View {
             ZStack {
                 Circle()
                     .fill(iconBackground)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
                 Image(systemName: prayer.icon)
-                    .font(.system(size: 18))
+                    .font(.system(size: 20))
                     .foregroundColor(iconColor)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(prayer.name)
-                    .font(.system(size: 16, weight: prayer.isActive ? .semibold : .medium))
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(nameColor)
 
                 Text(prayer.arabicName)
-                    .font(.system(size: 12))
-                    .foregroundColor(.appMutedForeground)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5))
             }
 
             Spacer()
 
-            HStack(spacing: 12) {
+            HStack(spacing: 16) {
                 Text(prayer.time)
-                    .font(.system(size: 14, weight: .medium))
-                    .monospacedDigit()
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(nameColor)
 
                 if prayer.isPassed {
                     ZStack {
                         Circle()
-                            .fill(Color.green.opacity(0.2))
-                            .frame(width: 20, height: 20)
+                            .fill(Color(red: 0.82, green: 0.91, blue: 0.85)) // checkmark bg
+                            .frame(width: 22, height: 22)
                         Image(systemName: "checkmark")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.green)
+                            .foregroundColor(Color(red: 0.35, green: 0.6, blue: 0.45)) // checkmark color
                     }
-                }
-
-                if prayer.isActive {
-                    Circle()
-                        .fill(Color.appPrimary)
-                        .frame(width: 8, height: 8)
+                } else if prayer.isActive {
+                    ZStack {
+                        Circle()
+                            .fill(Color.clear)
+                            .frame(width: 22, height: 22)
+                        Circle()
+                            .fill(Color(red: 0.35, green: 0.6, blue: 0.45))
+                            .frame(width: 8, height: 8)
+                    }
+                } else {
+                    // Empty space for un-passed items to keep alignment
+                    Spacer().frame(width: 22)
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(prayer.isActive ? Color.appPrimary.opacity(0.05) : Color.clear)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(rowBackgroundColor)
     }
 }
 

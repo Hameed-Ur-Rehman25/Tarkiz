@@ -2,6 +2,7 @@ import Foundation
 import CoreLocation
 import SwiftUI
 import Combine
+import MapKit
 
 /// A simple manager to handle requesting location permissions.
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -40,13 +41,19 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let location = locations.first else { return }
         manager.stopUpdatingLocation()
         
-        CLGeocoder().reverseGeocodeLocation(location) { [weak self] placemarks, error in
-            DispatchQueue.main.async {
-                self?.isFetching = false
-                if let placemark = placemarks?.first {
-                    self?.fetchedCity = placemark.locality ?? placemark.subAdministrativeArea ?? placemark.administrativeArea ?? "Unknown City"
-                    self?.fetchedCountry = placemark.country ?? "Unknown Country"
+        if let request = MKReverseGeocodingRequest(location: location) {
+            request.getMapItems { [weak self] mapItems, error in
+                DispatchQueue.main.async {
+                    self?.isFetching = false
+                    if let placemark = mapItems?.first?.placemark {
+                        self?.fetchedCity = placemark.locality ?? placemark.subAdministrativeArea ?? placemark.administrativeArea ?? "Unknown City"
+                        self?.fetchedCountry = placemark.country ?? "Unknown Country"
+                    }
                 }
+            }
+        } else {
+            DispatchQueue.main.async {
+                self.isFetching = false
             }
         }
     }

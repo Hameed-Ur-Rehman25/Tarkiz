@@ -124,14 +124,15 @@ struct PrayerSettingsView: View {
                                 }
                             }
                             Spacer()
+                        }
+                        .overlay(
                             Text("Prayer Settings")
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(.appForeground)
-                            Spacer().frame(width: 40)
-                        }
+                        )
                         .padding(.top, 56)
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 24)
 
         // Location Section
                         SettingsSection {

@@ -14,12 +14,22 @@ struct Prayer: Identifiable {
     var isPassed: Bool = false
 }
 
+// Placeholder prayers shown before real data loads
+private let placeholderPrayers: [Prayer] = [
+    Prayer(name: "Fajr",    arabicName: "الفجر",  time: "--:--", icon: "moon.fill"),
+    Prayer(name: "Sunrise", arabicName: "الشروق", time: "--:--", icon: "sunrise.fill"),
+    Prayer(name: "Dhuhr",   arabicName: "الظهر",  time: "--:--", icon: "sun.max.fill"),
+    Prayer(name: "Asr",     arabicName: "العصر",  time: "--:--", icon: "cloud.sun.fill"),
+    Prayer(name: "Maghrib", arabicName: "المغرب", time: "--:--", icon: "sunset.fill"),
+    Prayer(name: "Isha",    arabicName: "العشاء", time: "--:--", icon: "sparkles"),
+]
+
 // MARK: - PrayerTimesViewModel
 
 @MainActor
 class PrayerTimesViewModel: ObservableObject {
 
-    @Published var prayers: [Prayer] = []
+    @Published var prayers: [Prayer] = placeholderPrayers
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var hijriDate: String = ""
@@ -222,38 +232,57 @@ struct PrayerTimesView: View {
                         .padding(.top, 32)
                         .padding(.bottom, 8)
 
-                        // Loading / Error / Content
-                        if viewModel.isLoading {
-                            ProgressView()
-                                .tint(.appPrimary)
-                                .scaleEffect(1.3)
-                                .padding(.vertical, 48)
-                        } else if let error = viewModel.errorMessage {
-                            ErrorBanner(message: error) {
-                                Task { await viewModel.loadPrayerTimes() }
+                        // Error banner (small, non-blocking)
+                        if let error = viewModel.errorMessage {
+                            HStack(spacing: 10) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.orange)
+                                    .font(.system(size: 14))
+                                Text(error)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.appMutedForeground)
+                                Spacer()
+                                Button {
+                                    Task { await viewModel.loadPrayerTimes() }
+                                } label: {
+                                    Text("Retry")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(.appPrimary)
+                                }
                             }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.orange.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                             .padding(.horizontal, 16)
-                        } else {
-                            // Current Prayer Card
-                            if let active = viewModel.activePrayer {
-                                CurrentPrayerCard(prayer: active, nextPrayer: viewModel.nextPrayer)
-                                    .padding(.horizontal, 16)
-                            }
-
-                            // Prayer List
-                            if !viewModel.prayers.isEmpty {
-                                PrayerListCard(prayers: viewModel.prayers)
-                                    .padding(.horizontal, 16)
-                            }
-
-                            // Location
-                            PrayerLocationCard(
-                                city:   viewModel.locationDisplay,
-                                method: viewModel.methodDisplay
-                            )
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 32)
                         }
+
+                        // Current Prayer Card — always visible
+                        if let active = viewModel.activePrayer {
+                            CurrentPrayerCard(prayer: active, nextPrayer: viewModel.nextPrayer)
+                                .padding(.horizontal, 16)
+                        } else if !viewModel.isLoading {
+                            // Before Fajr or after Isha — show next prayer
+                            if let next = viewModel.nextPrayer {
+                                NextPrayerCard(prayer: next)
+                                    .padding(.horizontal, 16)
+                            }
+                        }
+
+                        // Prayer List — always visible (shows --:-- while loading)
+                        PrayerListCard(
+                            prayers: viewModel.prayers,
+                            isLoading: viewModel.isLoading
+                        )
+                        .padding(.horizontal, 16)
+
+                        // Location
+                        PrayerLocationCard(
+                            city:   viewModel.locationDisplay,
+                            method: viewModel.methodDisplay
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 32)
                     }
                 }
                 .background(Color.appCard)
@@ -351,18 +380,63 @@ struct CurrentPrayerCard: View {
     }
 }
 
+// MARK: - Next Prayer Card (Before Fajr / After Isha)
+
+struct NextPrayerCard: View {
+    let prayer: Prayer
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("NEXT PRAYER")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.appPrimary)
+                Text(prayer.name)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.appForeground)
+                Text(prayer.arabicName)
+                    .font(.system(size: 12))
+                    .foregroundColor(.appMutedForeground)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 4) {
+                Image(systemName: prayer.icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(.appPrimary)
+                Text(prayer.time)
+                    .font(.system(size: 18, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundColor(.appForeground)
+            }
+        }
+        .padding(20)
+        .background(Color.appPrimary.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+    }
+}
+
 // MARK: - Prayer List Card
 
 struct PrayerListCard: View {
     let prayers: [Prayer]
+    var isLoading: Bool = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(prayers.enumerated()), id: \.element.id) { index, prayer in
-                PrayerRow(prayer: prayer)
-                if index < prayers.count - 1 {
-                    Divider().background(Color.appBorder)
+        ZStack {
+            VStack(spacing: 0) {
+                ForEach(Array(prayers.enumerated()), id: \.element.id) { index, prayer in
+                    PrayerRow(prayer: prayer)
+                    if index < prayers.count - 1 {
+                        Divider().background(Color.appBorder)
+                    }
                 }
+            }
+            .opacity(isLoading ? 0.5 : 1.0)
+
+            if isLoading {
+                ProgressView()
+                    .tint(.appPrimary)
+                    .scaleEffect(1.2)
             }
         }
         .background(Color.appSecondary.opacity(0.5))

@@ -130,7 +130,7 @@ struct PrayerSettingsView: View {
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(.appForeground)
                         )
-                        .padding(.top, 56)
+                        .padding(.top, 24)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 24)
 
@@ -180,31 +180,32 @@ struct PrayerSettingsView: View {
                                     .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(.appForeground)
 
-                                VStack(spacing: 8) {
-                                    ForEach(viewModel.methods) { method in
-                                        Button { viewModel.selectedMethodId = method.id } label: {
-                                            HStack {
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text(method.name)
-                                                        .font(.system(size: 14))
-                                                        .foregroundColor(viewModel.selectedMethodId == method.id ? .appPrimary : .appForeground)
-                                                    Text(method.region)
-                                                        .font(.system(size: 11))
-                                                        .foregroundColor(.appMutedForeground)
-                                                }
-                                                Spacer()
-                                                if viewModel.selectedMethodId == method.id {
-                                                    Image(systemName: "checkmark.circle.fill")
-                                                        .foregroundColor(.appPrimary)
-                                                }
+                                NavigationLink(destination: CalculationMethodSettingsView(viewModel: viewModel)) {
+                                    HStack(spacing: 12) {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            if let currentMethod = viewModel.methods.first(where: { $0.id == viewModel.selectedMethodId }) {
+                                                Text(currentMethod.name)
+                                                    .font(.system(size: 15, weight: .medium))
+                                                    .foregroundColor(.appForeground)
+                                                    .multilineTextAlignment(.leading)
+                                                Text(currentMethod.region)
+                                                    .font(.system(size: 12))
+                                                    .foregroundColor(.appMutedForeground)
+                                            } else {
+                                                Text("Select Method")
+                                                    .font(.system(size: 15, weight: .medium))
+                                                    .foregroundColor(.appForeground)
                                             }
-                                            .padding(12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 14)
-                                                    .fill(viewModel.selectedMethodId == method.id ? Color.appPrimary.opacity(0.08) : Color.appSecondary.opacity(0.5))
-                                            )
                                         }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.appMutedForeground)
                                     }
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 16)
+                                    .background(Color.appSecondary.opacity(0.5))
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -261,11 +262,6 @@ struct PrayerSettingsView: View {
                     .padding(.bottom, 32)
                 }
                 .background(Color.appCard)
-                .clipShape(
-                    RoundedCornerShape(radius: 56, corners: [.bottomLeft, .bottomRight])
-                )
-                .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
-                .padding(.bottom, 24)
             }
         }
         .navigationBarHidden(true)

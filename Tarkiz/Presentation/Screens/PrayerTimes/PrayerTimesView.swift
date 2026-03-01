@@ -339,38 +339,36 @@ struct CurrentPrayerCard: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("CURRENT PRAYER")
-                        .font(.system(size: 13, weight: .regular))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(Color(red: 0.27, green: 0.58, blue: 0.43)) // Custom green
-                        .tracking(0.5)
-                        .padding(.bottom, 4)
                         
                     Text(prayer.name)
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.system(size: 24, weight: .bold))
                         .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                         
                     Text(prayer.arabicName)
-                        .font(.system(size: 16, weight: .regular))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5)) // Custom gray
                 }
                 
                 Spacer()
                 
-                VStack(alignment: .trailing, spacing: 20) {
+                VStack(alignment: .trailing, spacing: 8) {
                     ZStack {
                         Circle()
                             .fill(Color(red: 0.88, green: 0.9, blue: 0.89)) // Icon bg green
-                            .frame(width: 56, height: 56)
+                            .frame(width: 48, height: 48)
                         Image(systemName: prayer.icon)
-                            .font(.system(size: 24, weight: .regular))
+                            .font(.system(size: 22, weight: .regular))
                             .foregroundColor(Color(red: 0.35, green: 0.6, blue: 0.45))
                     }
                     
                     Text(prayer.time)
-                        .font(.system(size: 22, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
+                        .monospacedDigit()
                         .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                 }
             }
-            .padding(.bottom, 16)
 
             if let next = nextPrayer {
                 Divider()
@@ -378,22 +376,13 @@ struct CurrentPrayerCard: View {
                     .padding(.bottom, 16)
                     
                 HStack(spacing: 4) {
-                    Text("Next:")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5))
-                        
-                    Text(next.name)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
-                        
-                    Text("at \(next.time)")
-                        .font(.system(size: 16, weight: .regular))
+                    Text("Next: \(Text(next.name).fontWeight(.semibold).foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))) at \(next.time)")
+                        .font(.system(size: 14))
                         .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5))
                 }
             }
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 24)
+        .padding(20)
         .background(Color(red: 0.91, green: 0.92, blue: 0.91)) // Card bg
         .clipShape(RoundedRectangle(cornerRadius: 24))
     }
@@ -409,27 +398,27 @@ struct NextPrayerCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("NEXT PRAYER")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.appPrimary)
+                    .foregroundColor(Color(red: 0.27, green: 0.58, blue: 0.43))
                 Text(prayer.name)
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.appForeground)
+                    .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                 Text(prayer.arabicName)
                     .font(.system(size: 12))
-                    .foregroundColor(.appMutedForeground)
+                    .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5))
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
                 Image(systemName: prayer.icon)
                     .font(.system(size: 20))
-                    .foregroundColor(.appPrimary)
+                    .foregroundColor(Color(red: 0.35, green: 0.6, blue: 0.45))
                 Text(prayer.time)
                     .font(.system(size: 18, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundColor(.appForeground)
+                    .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
             }
         }
         .padding(20)
-        .background(Color.appPrimary.opacity(0.1))
+        .background(Color(red: 0.91, green: 0.92, blue: 0.91))
         .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 }
@@ -491,7 +480,7 @@ struct PrayerRow: View {
         if prayer.isActive {
             return Color(red: 0.91, green: 0.92, blue: 0.91) // active card bg
         }
-        return Color(red: 0.95, green: 0.94, blue: 0.94) // list card bg
+        return Color.clear // match location tile background
     }
 
     var body: some View {
@@ -499,34 +488,35 @@ struct PrayerRow: View {
             ZStack {
                 Circle()
                     .fill(iconBackground)
-                    .frame(width: 44, height: 44)
+                    .frame(width: 40, height: 40)
                 Image(systemName: prayer.icon)
-                    .font(.system(size: 20))
+                    .font(.system(size: 18))
                     .foregroundColor(iconColor)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(prayer.name)
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 16, weight: prayer.isActive ? .semibold : .medium))
                     .foregroundColor(nameColor)
 
                 Text(prayer.arabicName)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Color(red: 0.45, green: 0.48, blue: 0.5))
             }
 
             Spacer()
 
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Text(prayer.time)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
+                    .monospacedDigit()
                     .foregroundColor(nameColor)
 
                 if prayer.isPassed {
                     ZStack {
                         Circle()
                             .fill(Color(red: 0.82, green: 0.91, blue: 0.85)) // checkmark bg
-                            .frame(width: 22, height: 22)
+                            .frame(width: 20, height: 20)
                         Image(systemName: "checkmark")
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(Color(red: 0.35, green: 0.6, blue: 0.45)) // checkmark color
@@ -535,19 +525,19 @@ struct PrayerRow: View {
                     ZStack {
                         Circle()
                             .fill(Color.clear)
-                            .frame(width: 22, height: 22)
+                            .frame(width: 20, height: 20)
                         Circle()
                             .fill(Color(red: 0.35, green: 0.6, blue: 0.45))
                             .frame(width: 8, height: 8)
                     }
                 } else {
                     // Empty space for un-passed items to keep alignment
-                    Spacer().frame(width: 22)
+                    Spacer().frame(width: 20)
                 }
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(rowBackgroundColor)
     }
 }

@@ -6,7 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BC5FF2C92F559881004EB142 /* FamilyControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2C82F559881004EB142 /* FamilyControls.framework */; };
+		BC5FF2CB2F55988D004EB142 /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */; };
+		BC5FF2CD2F55989B004EB142 /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2CC2F55989B004EB142 /* DeviceActivity.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		BC5FF2C82F559881004EB142 /* FamilyControls.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FamilyControls.framework; path = System/Library/Frameworks/FamilyControls.framework; sourceTree = SDKROOT; };
+		BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettings.framework; path = System/Library/Frameworks/ManagedSettings.framework; sourceTree = SDKROOT; };
+		BC5FF2CC2F55989B004EB142 /* DeviceActivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceActivity.framework; path = System/Library/Frameworks/DeviceActivity.framework; sourceTree = SDKROOT; };
 		BCBB99352F45DE27009E396D /* Tarkiz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tarkiz.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -23,16 +32,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC5FF2C92F559881004EB142 /* FamilyControls.framework in Frameworks */,
+				BC5FF2CB2F55988D004EB142 /* ManagedSettings.framework in Frameworks */,
+				BC5FF2CD2F55989B004EB142 /* DeviceActivity.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BC5FF2C72F559880004EB142 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BC5FF2CC2F55989B004EB142 /* DeviceActivity.framework */,
+				BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */,
+				BC5FF2C82F559881004EB142 /* FamilyControls.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		BCBB992C2F45DE27009E396D = {
 			isa = PBXGroup;
 			children = (
 				BCBB99372F45DE27009E396D /* Tarkiz */,
+				BC5FF2C72F559880004EB142 /* Frameworks */,
 				BCBB99362F45DE27009E396D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -251,6 +274,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Tarkiz/Tarkiz.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 49W84348H5;
@@ -284,6 +308,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Tarkiz/Tarkiz.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 49W84348H5;

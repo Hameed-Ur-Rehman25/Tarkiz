@@ -1,7 +1,10 @@
 import SwiftUI
+import Combine
 
 struct NFCSetupView: View {
     @ObservedObject var viewModel: SetupViewModel
+    @StateObject private var nfcManager = NFCManager()
+    @State private var cancellables = Set<AnyCancellable>()
     @State private var isScanning = false
     
     var body: some View {
@@ -61,14 +64,9 @@ struct NFCSetupView: View {
             
             // Scan Button
             Button(action: {
-                // Simulate scanning
-                isScanning = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    isScanning = false
-                    viewModel.completeSetup()
-                }
+                nfcManager.startScanning()
             }) {
-                Text(isScanning ? "Scanning..." : "Scan NFC Tag")
+                Text(nfcManager.isScanning ? "Scanning..." : "Scan NFC Tag")
                     .font(Typography.button)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -77,7 +75,15 @@ struct NFCSetupView: View {
                     .cornerRadius(12)
             }
             .padding(.horizontal)
-            .disabled(isScanning)
+            .disabled(nfcManager.isScanning)
+            .onAppear {
+                nfcManager.$scannedTagID
+                    .compactMap { $0 }
+                    .sink { _ in
+                        viewModel.completeSetup()
+                    }
+                    .store(in: &cancellables)
+            }
             
             Button("Skip for now") {
                 viewModel.skip()

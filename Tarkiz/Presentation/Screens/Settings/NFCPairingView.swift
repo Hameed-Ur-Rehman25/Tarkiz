@@ -5,17 +5,44 @@ import Combine
 
 class NFCPairingViewModel: ObservableObject {
     @Published var scanState: NFCScanState = .idle
+    private let nfcManager = NFCManager()
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        nfcManager.$scannedTagID
+            .compactMap { $0 }
+            .sink { [weak self] _ in
+                Haptics.notification(.success)
+                self?.scanState = .success
+            }
+            .store(in: &cancellables)
+            
+        nfcManager.$isScanning
+            .sink { [weak self] isScanning in
+                if isScanning {
+                    self?.scanState = .scanning
+                } else if self?.scanState == .scanning {
+                    self?.scanState = .idle
+                }
+            }
+            .store(in: &cancellables)
+
+        nfcManager.$error
+            .compactMap { $0 }
+            .sink { _ in
+                Haptics.notification(.error)
+                // Optionally handle error state
+            }
+            .store(in: &cancellables)
+    }
 
     func startScan() {
         Haptics.impact(.medium)
-        scanState = .scanning
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
-            Haptics.notification(.success)
-            self?.scanState = .success
-        }
+        nfcManager.startScanning()
     }
 
     func reset() {
+        nfcManager.stopScanning()
         scanState = .idle
     }
 }

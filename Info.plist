@@ -22,6 +22,12 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to calculate accurate prayer times.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>We use NFC to pair with your prayer mat and focus tools.</string>
+	<key>com.apple.developer.nfc.readersession.formats</key>
+	<array>
+		<string>NDEF</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

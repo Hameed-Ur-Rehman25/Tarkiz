@@ -7,17 +7,12 @@ struct AppItem: Identifiable {
     let usage: String
 }
 
+import FamilyControls
+
 struct BlockAppsView: View {
     @ObservedObject var viewModel: SetupViewModel
-    @State private var selectedApps: Set<UUID> = []
-    
-    let apps = [
-        AppItem(name: "TikTok", iconName: "music.note", usage: "1h 32m"),
-        AppItem(name: "Instagram", iconName: "camera.fill", usage: "1h 53m"),
-        AppItem(name: "Facebook", iconName: "person.2.fill", usage: "0h 31m"),
-        AppItem(name: "Twitter", iconName: "bird.fill", usage: "0h 45m"),
-        AppItem(name: "Snapchat", iconName: "bell.fill", usage: "0h 20m")
-    ]
+    @StateObject private var screenTimeService = ScreenTimeService.shared
+    @State private var isPickerPresented = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -44,60 +39,46 @@ struct BlockAppsView: View {
                 .multilineTextAlignment(.center)
                 .foregroundColor(AppTheme.primaryColor)
             
-            Text("\(selectedApps.count) distractions selected")
+            Text("\(screenTimeService.selection.applications.count + screenTimeService.selection.categories.count) distractions selected")
                 .font(Typography.heading)
                 .foregroundColor(AppTheme.primaryColor)
                 .padding(.vertical, 10)
             
-            // Apps List
-            List(apps) { app in
-                Button(action: {
-                    if selectedApps.contains(app.id) {
-                        selectedApps.remove(app.id)
-                    } else {
-                        selectedApps.insert(app.id)
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: app.iconName)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30, height: 30)
-                            .padding(10)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(10)
-                            .foregroundColor(AppTheme.primaryColor)
-                        
-                        VStack(alignment: .leading) {
-                            Text(app.name)
-                                .font(Typography.body.weight(.semibold))
-                                .foregroundColor(AppTheme.primaryColor)
-                            Text("Daily average: \(app.usage)")
-                                .font(Typography.caption)
-                                .foregroundColor(.gray)
-                        }
-                        
-                        Spacer()
-                        
-                        if selectedApps.contains(app.id) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(AppTheme.sageGreen)
-                        }
-                    }
-                    .padding(.vertical, 5)
+            // App Selection Button
+            Button(action: {
+                isPickerPresented = true
+            }) {
+                VStack(spacing: 12) {
+                    Image(systemName: "apps.iphone.badge.plus")
+                        .font(.system(size: 40))
+                        .foregroundColor(AppTheme.sageGreen)
+                    
+                    Text("Select Apps to Block")
+                        .font(Typography.body.weight(.semibold))
+                        .foregroundColor(AppTheme.primaryColor)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+                .background(Color.gray.opacity(0.05))
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(AppTheme.sageGreen.opacity(0.3), lineWidth: 1)
+                )
             }
-            .listStyle(PlainListStyle())
+            .padding(.horizontal)
+            .familyActivityPicker(isPresented: $isPickerPresented, selection: $screenTimeService.selection)
             
-            Button("+ Add more apps to block") {
-                // Placeholder action
-            }
-            .foregroundColor(AppTheme.sageGreen)
-            .font(Typography.body.weight(.medium))
-            .padding(.bottom, 10)
+            Spacer()
+            
+            Text("Tip: You can change these later in settings")
+                .font(Typography.caption)
+                .foregroundColor(.gray)
+                .padding(.bottom, 10)
             
             // Complete Setup Button
             Button(action: {
+                screenTimeService.applyShield()
                 withAnimation {
                      viewModel.nextStep()
                 }
@@ -112,6 +93,9 @@ struct BlockAppsView: View {
             }
             .padding(.horizontal)
             .padding(.bottom, 20)
+        }
+        .onAppear {
+            viewModel.requestScreenTimeAuthorization()
         }
         .background(AppTheme.backgroundColor.ignoresSafeArea())
     }

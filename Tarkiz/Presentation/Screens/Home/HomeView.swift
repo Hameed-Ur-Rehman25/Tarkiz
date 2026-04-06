@@ -21,6 +21,16 @@ class HomeViewModel: ObservableObject {
     @Published var nfcSheetOpen = false
     @Published var protectedHours = 0
     @Published var protectedMinutes = 0
+    @Published var isBlockingActive = false
+
+    // Apps used for the blocking test panel
+    let testApps: [(icon: String, name: String)] = [
+        ("🎵", "TikTok"),
+        ("📷", "Instagram"),
+        ("👤", "Facebook"),
+        ("▶️", "YouTube"),
+        ("🎬", "Netflix"),
+    ]
 
     let prayerModes: [PrayerMode] = [
         PrayerMode(id: "salah", name: "Salah Time", description: "Block during prayer windows", icon: "🕌", blockedApps: 12, categories: 3),
@@ -36,6 +46,13 @@ class HomeViewModel: ObservableObject {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
         isLocked.toggle()
+    }
+
+    func testToggleBlocking() {
+        UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            isBlockingActive.toggle()
+        }
     }
 }
 
@@ -117,7 +134,113 @@ struct HomeView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 24))
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 32)
+
+                    // ── Test Blocking Panel ──────────────────────────────
+                    VStack(spacing: 12) {
+                        // Header row
+                        HStack(spacing: 6) {
+                            Text("🧪")
+                                .font(.system(size: 13))
+                            Text("Test App Blocking")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.appMutedForeground)
+                            Spacer()
+                            // Status pill
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(viewModel.isBlockingActive ? Color.green : Color.gray.opacity(0.5))
+                                    .frame(width: 7, height: 7)
+                                Text(viewModel.isBlockingActive ? "ACTIVE" : "INACTIVE")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(viewModel.isBlockingActive ? .green : .gray)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(viewModel.isBlockingActive ? Color.green.opacity(0.12) : Color.gray.opacity(0.08))
+                            )
+                        }
+
+                        // App icons row
+                        HStack(spacing: 8) {
+                            ForEach(viewModel.testApps, id: \.name) { app in
+                                ZStack(alignment: .topTrailing) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.appSecondary)
+                                            .frame(width: 40, height: 40)
+                                        Text(app.icon).font(.system(size: 20))
+                                    }
+                                    .opacity(viewModel.isBlockingActive ? 0.45 : 1)
+
+                                    if viewModel.isBlockingActive {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.red)
+                                            .offset(x: 4, y: -4)
+                                            .transition(.scale)
+                                    }
+                                }
+                            }
+                            Spacer()
+                        }
+
+                        // Block / Unblock buttons
+                        HStack(spacing: 10) {
+                            Button {
+                                if !viewModel.isBlockingActive { viewModel.testToggleBlocking() }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "shield.fill")
+                                        .font(.system(size: 13))
+                                    Text("Block Apps")
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 11)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(viewModel.isBlockingActive ? Color.appPrimary.opacity(0.35) : Color.appPrimary)
+                                )
+                            }
+                            .disabled(viewModel.isBlockingActive)
+
+                            Button {
+                                if viewModel.isBlockingActive { viewModel.testToggleBlocking() }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "lock.open.fill")
+                                        .font(.system(size: 13))
+                                    Text("Unblock Apps")
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                .foregroundColor(viewModel.isBlockingActive ? .appForeground : .appMutedForeground)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 11)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(Color.appSecondary.opacity(viewModel.isBlockingActive ? 0.9 : 0.4))
+                                )
+                            }
+                            .disabled(!viewModel.isBlockingActive)
+                        }
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.appBackground.opacity(0.6))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(
+                                        viewModel.isBlockingActive ? Color.appPrimary.opacity(0.4) : Color.appBorder.opacity(0.5),
+                                        lineWidth: 1
+                                    )
+                            )
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 28)
                 }
                 .background(Color.appCard)
                 .clipShape(

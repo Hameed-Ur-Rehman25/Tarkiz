@@ -63,8 +63,9 @@ class BlocklistViewModel: ObservableObject {
 // MARK: - BlocklistView
 
 struct BlocklistView: View {
-    @StateObject private var viewModel = BlocklistViewModel()
+    @StateObject private var screenTimeService = ScreenTimeService.shared
     @EnvironmentObject var coordinator: AppCoordinator
+    @State private var isPickerPresented = false
 
     var body: some View {
         ZStack {
@@ -89,69 +90,48 @@ struct BlocklistView: View {
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.appForeground)
                         Spacer()
-                        Text("\(viewModel.blockedCount)")
+                        Text("\(screenTimeService.selection.applications.count + screenTimeService.selection.categories.count)")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.appMutedForeground)
                             .frame(width: 40)
                     }
                     .padding(.top, 56)
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 24)
 
-                    // Quick Actions
-                    HStack(spacing: 8) {
-                        QuickActionButton(title: "Block All") { viewModel.blockAll() }
-                        QuickActionButton(title: "Unblock All") { viewModel.unblockAll() }
-                        Spacer()
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
-
-                    // Search
-                    HStack(spacing: 10) {
-                        Image(systemName: "magnifyingglass")
+                    // Selection Card
+                    VStack(spacing: 20) {
+                        Image(systemName: "shield.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.appPrimary)
+                        
+                        Text("App Shielding is Active")
+                            .font(.system(size: 20, weight: .bold))
+                        
+                        Text("Apps selected here will be blocked when focus mode is active.")
+                            .font(.system(size: 14))
                             .foregroundColor(.appMutedForeground)
-                        TextField("Search apps...", text: $viewModel.searchText)
-                            .font(.system(size: 15))
+                            .multilineTextAlignment(.center)
+                        
+                        Button {
+                            isPickerPresented = true
+                        } label: {
+                            Text("Modify Selection")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Color.appPrimary)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                        }
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.appSecondary.opacity(0.6))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .padding(24)
+                    .background(Color.appSecondary.opacity(0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 12)
-
-                    // Category Filter
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(viewModel.availableCategories, id: \.self) { cat in
-                                Button { viewModel.selectedCategory = cat } label: {
-                                    Text(cat)
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(viewModel.selectedCategory == cat ? .white : .appMutedForeground)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(viewModel.selectedCategory == cat ? Color.appPrimary : Color.appSecondary.opacity(0.5))
-                                        .clipShape(Capsule())
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    .padding(.bottom, 12)
-
-                    // App List
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            ForEach(Array(viewModel.filteredApps.enumerated()), id: \.element.id) { idx, app in
-                                AppToggleRow(app: app) { viewModel.toggle(app.id) }
-                                if idx < viewModel.filteredApps.count - 1 {
-                                    Divider().background(Color.appBorder).padding(.leading, 74)
-                                }
-                            }
-                        }
-                    }
                     .padding(.bottom, 32)
+                    
+                    Spacer()
                 }
                 .background(Color.appCard)
                 .clipShape(
@@ -160,6 +140,10 @@ struct BlocklistView: View {
                 .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
                 .padding(.bottom, 24)
             }
+        }
+        .familyActivityPicker(isPresented: $isPickerPresented, selection: $screenTimeService.selection)
+        .onChange(of: screenTimeService.selection) { _ in
+            screenTimeService.applyShield()
         }
         .navigationBarHidden(true)
     }

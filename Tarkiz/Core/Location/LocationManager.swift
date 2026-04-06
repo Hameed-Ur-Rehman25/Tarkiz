@@ -2,7 +2,6 @@ import Foundation
 import CoreLocation
 import SwiftUI
 import Combine
-import MapKit
 
 /// Manages location permissions, GPS coordinates, and reverse geocoding.
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -51,21 +50,18 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
 
         // Reverse geocode
-        if let request = MKReverseGeocodingRequest(location: location) {
-            request.getMapItems { [weak self] mapItems, _ in
-                DispatchQueue.main.async {
-                    self?.isFetching = false
-                    if let placemark = mapItems?.first?.placemark {
-                        self?.fetchedCity    = placemark.locality
-                                           ?? placemark.subAdministrativeArea
-                                           ?? placemark.administrativeArea
-                                           ?? "Unknown City"
-                        self?.fetchedCountry = placemark.country ?? "Unknown Country"
-                    }
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
+            DispatchQueue.main.async {
+                self?.isFetching = false
+                if let placemark = placemarks?.first {
+                    self?.fetchedCity    = placemark.locality
+                                       ?? placemark.subAdministrativeArea
+                                       ?? placemark.administrativeArea
+                                       ?? "Unknown City"
+                    self?.fetchedCountry = placemark.country ?? "Unknown Country"
                 }
             }
-        } else {
-            DispatchQueue.main.async { self.isFetching = false }
         }
     }
 

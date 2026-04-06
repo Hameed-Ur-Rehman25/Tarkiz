@@ -4,13 +4,6 @@ import Combine
 
 // MARK: - Data Models (Onboarding specific)
 
-struct OnboardingCalculationMethod: Identifiable, Hashable {
-    let id: String
-    let name: String
-    let description: String
-    let region: String
-}
-
 struct OnboardingLocationOption: Identifiable, Hashable {
     var id: String { city }
     let city: String
@@ -28,23 +21,6 @@ struct OnboardingAppItem: Identifiable {
 }
 
 // MARK: - Static Data
-
-// Maps onboarding method IDs to AlAdhan integer method IDs
-private let methodIdMap: [String: Int] = [
-    "mwl":     3,
-    "isna":    2,
-    "egypt":   5,
-    "makkah":  4,
-    "karachi": 1,
-]
-
-private let onboardingCalculationMethods: [OnboardingCalculationMethod] = [
-    .init(id: "mwl",     name: "Muslim World League",         description: "Fajr: 18°, Isha: 17°",    region: "Europe, Far East"),
-    .init(id: "isna",    name: "ISNA",                        description: "Fajr: 15°, Isha: 15°",    region: "North America"),
-    .init(id: "egypt",   name: "Egyptian General Authority",   description: "Fajr: 19.5°, Isha: 17.5°", region: "Africa, Middle East"),
-    .init(id: "makkah",  name: "Umm al-Qura",                 description: "Fajr: 18.5°, Isha: 90min", region: "Arabian Peninsula"),
-    .init(id: "karachi", name: "University of Karachi",        description: "Fajr: 18°, Isha: 18°",    region: "Pakistan, South Asia"),
-]
 
 private let onboardingPopularLocations: [OnboardingLocationOption] = [
     .init(city: "New York",  country: "USA",          flag: "🇺🇸"),
@@ -81,7 +57,7 @@ enum NFCScanState {
 class OnboardingFlowViewModel: ObservableObject {
     @Published var step: OnboardingStep = .welcome
     @Published var selectedLocation: OnboardingLocationOption?
-    @Published var selectedMethod: OnboardingCalculationMethod?
+    @Published var selectedMethod: CalculationMethod?
     @Published var apps: [OnboardingAppItem] = onboardingDefaultApps
     @Published var nfcState: NFCScanState = .idle
 
@@ -111,7 +87,7 @@ class OnboardingFlowViewModel: ObservableObject {
         selectedLongitude = lon
     }
 
-    func selectMethod(_ m: OnboardingCalculationMethod) {
+    func selectMethod(_ m: CalculationMethod) {
         Haptics.impact(.light)
         selectedMethod = m
     }
@@ -147,7 +123,7 @@ class OnboardingFlowViewModel: ObservableObject {
         if let lon = selectedLongitude { settings.longitude = lon }
         if let method = selectedMethod {
             settings.calculationMethodName = method.name
-            settings.calculationMethodId   = methodIdMap[method.id] ?? 3
+            settings.calculationMethodId   = method.id
         }
         settings.hasCompletedOnboarding = true
         // Invalidate the prayer times cache so fresh data is fetched
@@ -547,7 +523,7 @@ private struct MethodStep: View {
 
                 ScrollView {
                     VStack(spacing: 12) {
-                        ForEach(onboardingCalculationMethods) { method in
+                        ForEach(allCalculationMethods) { method in
                             let selected = vm.selectedMethod?.id == method.id
                             Button { vm.selectMethod(method) } label: {
                                 VStack(alignment: .leading, spacing: 8) {
@@ -615,6 +591,20 @@ private struct MethodStep: View {
 
 private struct BlocklistStep: View {
     @ObservedObject var vm: OnboardingFlowViewModel
+    @State private var searchText: String = ""
+    @State private var selectedCategory: String = "All"
+
+    private var availableCategories: [String] {
+        ["All"] + Array(Set(vm.apps.map(\.category))).sorted()
+    }
+
+    private var filteredApps: [OnboardingAppItem] {
+        vm.apps.filter { app in
+            let matchesCategory = selectedCategory == "All" || app.category == selectedCategory
+            let matchesSearch   = searchText.isEmpty || app.name.localizedCaseInsensitiveContains(searchText)
+            return matchesCategory && matchesSearch
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -626,18 +616,69 @@ private struct BlocklistStep: View {
                 .padding(.bottom, 24)
 
             VStack(spacing: 0) {
-                HStack { BackButton { vm.goBack() }; Spacer() }
-                    .padding(.bottom, 12)
+                // Back + counter
+                HStack {
+                    BackButton { vm.goBack() }
+                    Spacer()
+                    Text("\(vm.blockedCount) distraction\(vm.blockedCount != 1 ? "s" : "") selected")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.appForeground)
+                    Spacer()
+                    // Spacer equal to back button width for centering
+                    Color.clear.frame(width: 40, height: 40)
+                }
+                .padding(.bottom, 14)
 
-                Text("\(vm.blockedCount) distraction\(vm.blockedCount != 1 ? "s" : "") selected")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.appForeground)
-                    .padding(.bottom, 16)
+                // Quick actions
+                HStack(spacing: 8) {
+                    QuickActionButton(title: "Block All") {
+                        Haptics.impact(.medium)
+                        for i in vm.apps.indices { vm.apps[i].blocked = true }
+                    }
+                    QuickActionButton(title: "Unblock All") {
+                        Haptics.impact(.medium)
+                        for i in vm.apps.indices { vm.apps[i].blocked = false }
+                    }
+                    Spacer()
+                }
+                .padding(.bottom, 12)
 
+                // Search bar
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.appMutedForeground)
+                    TextField("Search apps...", text: $searchText)
+                        .font(.system(size: 15))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(Color.appSecondary.opacity(0.6))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .padding(.bottom, 10)
+
+                // Category chips
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(availableCategories, id: \.self) { cat in
+                            Button { selectedCategory = cat } label: {
+                                Text(cat)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(selectedCategory == cat ? .white : .appMutedForeground)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(selectedCategory == cat ? Color.appPrimary : Color.appSecondary.opacity(0.5))
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+                }
+                .padding(.bottom, 12)
+
+                // App list
                 ScrollView {
                     VStack(spacing: 0) {
-                        let blocked = vm.apps.filter(\.blocked)
-                        ForEach(Array(blocked.enumerated()), id: \.element.id) { idx, app in
+                        let list = filteredApps
+                        ForEach(Array(list.enumerated()), id: \.element.id) { idx, app in
                             Button { vm.toggleApp(app.id) } label: {
                                 HStack(spacing: 14) {
                                     ZStack {
@@ -647,48 +688,28 @@ private struct BlocklistStep: View {
                                         Text(app.icon).font(.system(size: 24))
                                     }
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(app.name).font(.system(size: 14, weight: .medium)).foregroundColor(.appForeground)
+                                        Text(app.name)
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundColor(.appForeground)
                                         if let avg = app.dailyAverage {
-                                            Text("Daily average : \(avg)").font(.system(size: 12)).foregroundColor(.appMutedForeground)
+                                            Text("Daily average : \(avg)")
+                                                .font(.system(size: 12))
+                                                .foregroundColor(.appMutedForeground)
+                                        } else {
+                                            Text(app.category)
+                                                .font(.system(size: 12))
+                                                .foregroundColor(.appMutedForeground)
                                         }
                                     }
                                     Spacer()
+                                    Image(systemName: app.blocked ? "minus.circle.fill" : "plus.circle")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(app.blocked ? Color.appPrimary : .appMutedForeground)
                                 }
                                 .padding(.vertical, 12)
                             }
-                            if idx < blocked.count - 1 {
-                                Divider().background(Color.appBorder)
-                            }
-                        }
-
-                        let unblocked = vm.apps.filter { !$0.blocked }
-                        if !unblocked.isEmpty {
-                            Divider().background(Color.appBorder).padding(.vertical, 4)
-                            ForEach(Array(unblocked.enumerated()), id: \.element.id) { idx, app in
-                                Button { vm.toggleApp(app.id) } label: {
-                                    HStack(spacing: 14) {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(Color.appSecondary)
-                                                .frame(width: 48, height: 48)
-                                            Text(app.icon).font(.system(size: 24))
-                                        }
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(app.name).font(.system(size: 14, weight: .medium)).foregroundColor(.appForeground)
-                                            if let avg = app.dailyAverage {
-                                                Text("Daily average : \(avg)").font(.system(size: 12)).foregroundColor(.appMutedForeground)
-                                            }
-                                        }
-                                        Spacer()
-                                        Image(systemName: "plus.circle")
-                                            .foregroundColor(.appMutedForeground)
-                                    }
-                                    .padding(.vertical, 12)
-                                    .opacity(0.6)
-                                }
-                                if idx < unblocked.count - 1 {
-                                    Divider().background(Color.appBorder)
-                                }
+                            if idx < list.count - 1 {
+                                Divider().background(Color.appBorder).padding(.leading, 62)
                             }
                         }
                     }

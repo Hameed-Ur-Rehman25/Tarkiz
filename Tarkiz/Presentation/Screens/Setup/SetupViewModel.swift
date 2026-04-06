@@ -79,6 +79,16 @@ final class SetupViewModel: ObservableObject {
         locationWrapper.requestAuthorization()
     }
     
+    func requestScreenTimeAuthorization() {
+        Task {
+            do {
+                try await ScreenTimeService.shared.requestAuthorization()
+            } catch {
+                print("Failed to authorize Screen Time: \(error)")
+            }
+        }
+    }
+    
     func completeSetup() {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
     }

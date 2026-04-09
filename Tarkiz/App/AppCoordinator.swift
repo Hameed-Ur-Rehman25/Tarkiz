@@ -16,7 +16,18 @@ enum AppRoute: Hashable {
     case lockScreen
 }
 
-// ... MainTab enum unchanged ...
+enum MainTab: Int, CaseIterable {
+    case home, prayer, stats, settings
+
+    var label: String {
+        switch self {
+        case .home: return "Home"
+        case .prayer: return "Prayer"
+        case .stats: return "Stats"
+        case .settings: return "Settings"
+        }
+    }
+}
 
 // MARK: - App Coordinator
 

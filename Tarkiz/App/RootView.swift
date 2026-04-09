@@ -44,24 +44,28 @@ struct MainTabView: View {
             NavigationStack(path: $coordinator.navigationPath) {
                 HomeView()
                     .navigationBarHidden(true)
+                    .toolbar(.hidden, for: .tabBar)
             }
             .tag(MainTab.home)
 
-            NavigationStack {
+            NavigationStack(path: $coordinator.navigationPath) {
                 PrayerTimesView()
                     .navigationBarHidden(true)
+                    .toolbar(.hidden, for: .tabBar)
             }
             .tag(MainTab.prayer)
 
-            NavigationStack {
+            NavigationStack(path: $coordinator.navigationPath) {
                 StatsView()
                     .navigationBarHidden(true)
+                    .toolbar(.hidden, for: .tabBar)
             }
             .tag(MainTab.stats)
 
             NavigationStack(path: $coordinator.navigationPath) {
                 SettingsView()
                     .navigationBarHidden(true)
+                    .toolbar(.hidden, for: .tabBar)
                     .navigationDestination(for: AppRoute.self) { route in
                         switch route {
                         case .blocklist:      BlocklistView()

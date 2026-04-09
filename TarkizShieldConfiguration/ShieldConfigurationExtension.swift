@@ -36,30 +36,31 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     }
     
     private func createTarkizShieldConfig() -> ShieldConfiguration {
-        // Fallback colors if the named ones aren't shared with the extension target
-        let primaryColor = UIColor(named: "AppPrimaryColor") ?? UIColor.systemBlue
-        let bgColor = UIColor(named: "BackgroundColor")?.withAlphaComponent(0.9) ?? UIColor.systemBackground.withAlphaComponent(0.9)
-        
+        // Hardcoded Tarkiz Branding (Sage Green/Premium Focus)
+        // components: R: 0.486, G: 0.624, B: 0.553
+        let tarkizPrimary = UIColor(red: 0.486, green: 0.624, blue: 0.553, alpha: 1.0)
+        let tarkizBackground = UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 0.85) // Dark premium feel
+
         return ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterial,
-            backgroundColor: bgColor,
+            backgroundColor: tarkizBackground,
             icon: UIImage(named: "NFCLogo") ?? UIImage(systemName: "shield.fill"),
             title: ShieldConfiguration.Label(
                 text: "Blocked by Tarkiz",
-                color: primaryColor
+                color: tarkizPrimary
             ),
             subtitle: ShieldConfiguration.Label(
                 text: "Stay focused on your goals. This app is currently restricted by Tarkiz to help you stay present and productive.",
-                color: .secondaryLabel
+                color: .white.withAlphaComponent(0.8)
             ),
             primaryButtonLabel: ShieldConfiguration.Label(
                 text: "Dismiss",
                 color: .white
             ),
-            primaryButtonBackgroundColor: primaryColor,
+            primaryButtonBackgroundColor: tarkizPrimary,
             secondaryButtonLabel: ShieldConfiguration.Label(
                 text: "Unlock with NFC",
-                color: primaryColor
+                color: tarkizPrimary
             )
         )
     }

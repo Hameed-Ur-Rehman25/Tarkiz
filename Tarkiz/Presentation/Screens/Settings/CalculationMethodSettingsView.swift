@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CalculationMethodSettingsView: View {
     @ObservedObject var viewModel: PrayerSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var coordinator: AppCoordinator
     
     var body: some View {
         ZStack {
@@ -13,7 +13,7 @@ struct CalculationMethodSettingsView: View {
                     VStack(spacing: 16) {
                         // Header
                         HStack {
-                            Button { presentationMode.wrappedValue.dismiss() } label: {
+                            Button { coordinator.pop() } label: {
                                 ZStack {
                                     Circle()
                                         .fill(Color.appSecondary)
@@ -39,7 +39,7 @@ struct CalculationMethodSettingsView: View {
                             ForEach(viewModel.methods) { method in
                                 Button {
                                     viewModel.selectedMethodId = method.id
-                                    presentationMode.wrappedValue.dismiss()
+                                    coordinator.pop()
                                 } label: {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {

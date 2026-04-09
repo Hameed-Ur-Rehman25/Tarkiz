@@ -12,21 +12,11 @@ enum AppRoute: Hashable {
     case blocklist
     case nfcPairing
     case prayerSettings
+    case calculationMethod
     case lockScreen
 }
 
-enum MainTab: Int, CaseIterable {
-    case home, prayer, stats, settings
-
-    var label: String {
-        switch self {
-        case .home: return "Home"
-        case .prayer: return "Prayer"
-        case .stats: return "Stats"
-        case .settings: return "Settings"
-        }
-    }
-}
+// ... MainTab enum unchanged ...
 
 // MARK: - App Coordinator
 
@@ -34,6 +24,7 @@ class AppCoordinator: ObservableObject {
     @Published var hasCompletedOnboarding = false
     @Published var isLocked = false
     @Published var selectedTab: MainTab = .home
+    @Published var isTabBarHidden: Bool = false
     @Published var navigationPath = NavigationPath()
 
     func completeOnboarding() {
@@ -53,13 +44,14 @@ class AppCoordinator: ObservableObject {
 
     func navigate(to route: AppRoute) {
         switch route {
-        case .home:           selectedTab = .home; navigationPath = NavigationPath()
-        case .prayerTimes:    selectedTab = .prayer; navigationPath = NavigationPath()
-        case .stats:          selectedTab = .stats; navigationPath = NavigationPath()
-        case .settings:       selectedTab = .settings; navigationPath = NavigationPath()
-        case .blocklist:      selectedTab = .settings; navigationPath.append(route)
-        case .nfcPairing:     selectedTab = .settings; navigationPath.append(route)
-        case .prayerSettings: selectedTab = .settings; navigationPath.append(route)
+        case .home:           selectedTab = .home; navigationPath = NavigationPath(); isTabBarHidden = false
+        case .prayerTimes:    selectedTab = .prayer; navigationPath = NavigationPath(); isTabBarHidden = false
+        case .stats:          selectedTab = .stats; navigationPath = NavigationPath(); isTabBarHidden = false
+        case .settings:       selectedTab = .settings; navigationPath = NavigationPath(); isTabBarHidden = false
+        case .blocklist:      selectedTab = .settings; navigationPath.append(route); isTabBarHidden = true
+        case .nfcPairing:     selectedTab = .settings; navigationPath.append(route); isTabBarHidden = true
+        case .prayerSettings: selectedTab = .settings; navigationPath.append(route); isTabBarHidden = true
+        case .calculationMethod: selectedTab = .settings; navigationPath.append(route); isTabBarHidden = true
         case .lockScreen:     showLockScreen()
         }
     }
@@ -67,5 +59,10 @@ class AppCoordinator: ObservableObject {
     func pop() {
         guard !navigationPath.isEmpty else { return }
         navigationPath.removeLast()
+        
+        // Return tab bar if we are at the root
+        if navigationPath.isEmpty {
+            isTabBarHidden = false
+        }
     }
 }

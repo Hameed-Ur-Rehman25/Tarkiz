@@ -180,7 +180,9 @@ struct PrayerSettingsView: View {
                                     .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(.appForeground)
 
-                                NavigationLink(destination: CalculationMethodSettingsView(viewModel: viewModel)) {
+                                Button {
+                                    coordinator.navigate(to: .calculationMethod)
+                                } label: {
                                     HStack(spacing: 12) {
                                         VStack(alignment: .leading, spacing: 2) {
                                             if let currentMethod = viewModel.methods.first(where: { $0.id == viewModel.selectedMethodId }) {

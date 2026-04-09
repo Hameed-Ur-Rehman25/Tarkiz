@@ -36,31 +36,31 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     }
     
     private func createTarkizShieldConfig() -> ShieldConfiguration {
-        // Hardcoded Tarkiz Branding (Sage Green/Premium Focus)
-        // components: R: 0.486, G: 0.624, B: 0.553
-        let tarkizPrimary = UIColor(red: 0.486, green: 0.624, blue: 0.553, alpha: 1.0)
-        let tarkizBackground = UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 0.85) // Dark premium feel
+        // Premium Tarkiz Aesthetic (Emerald Sage & Dark Glass)
+        // components: R: 0.35, G: 0.55, B: 0.45
+        let tarkizEmerald = UIColor(red: 0.35, green: 0.55, blue: 0.45, alpha: 1.0)
+        let darkGlass = UIColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 0.9)
 
         return ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterial,
-            backgroundColor: tarkizBackground,
+            backgroundColor: darkGlass,
             icon: UIImage(named: "NFCLogo") ?? UIImage(systemName: "shield.fill"),
             title: ShieldConfiguration.Label(
-                text: "Blocked by Tarkiz",
-                color: tarkizPrimary
+                text: "Pause & Connect",
+                color: .white
             ),
             subtitle: ShieldConfiguration.Label(
-                text: "Stay focused on your goals. This app is currently restricted by Tarkiz to help you stay present and productive.",
-                color: .white.withAlphaComponent(0.8)
+                text: "This app is resting so you can be fully present. Your focus is your greatest gift.",
+                color: .white.withAlphaComponent(0.7)
             ),
             primaryButtonLabel: ShieldConfiguration.Label(
                 text: "Dismiss",
                 color: .white
             ),
-            primaryButtonBackgroundColor: tarkizPrimary,
+            primaryButtonBackgroundColor: tarkizEmerald,
             secondaryButtonLabel: ShieldConfiguration.Label(
-                text: "Unlock with NFC",
-                color: tarkizPrimary
+                text: "Unlock with NFC Tag",
+                color: tarkizEmerald
             )
         )
     }

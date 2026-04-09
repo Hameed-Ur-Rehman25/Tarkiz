@@ -6,7 +6,7 @@ struct CalculationMethodSettingsView: View {
     
     var body: some View {
         ZStack {
-            Color.appBackground.ignoresSafeArea()
+            Color.white.ignoresSafeArea()
             
             VStack(spacing: 0) {
                 ScrollView {

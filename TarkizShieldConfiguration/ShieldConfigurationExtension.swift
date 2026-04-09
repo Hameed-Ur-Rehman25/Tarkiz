@@ -14,32 +14,39 @@ import UIKit
 // Make sure that your class name matches the NSExtensionPrincipalClass in your Info.plist.
 class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     
-    private let appPrimaryColor = UIColor(red: 0.0, green: 0.478, blue: 1.0, alpha: 1.0) // Matching AppPrimaryColor
+    // Explicitly nonisolated initializer to match superclass requirements for extensions
+    nonisolated override init() {
+        super.init()
+    }
 
-    override func configuration(shielding application: Application) -> ShieldConfiguration {
+    nonisolated override func configuration(shielding application: Application) -> ShieldConfiguration {
         return createTarkizShieldConfig()
     }
     
-    override func configuration(shielding application: Application, in category: ActivityCategory) -> ShieldConfiguration {
+    nonisolated override func configuration(shielding application: Application, in category: ActivityCategory) -> ShieldConfiguration {
         return createTarkizShieldConfig()
     }
     
-    override func configuration(shielding webDomain: WebDomain) -> ShieldConfiguration {
+    nonisolated override func configuration(shielding webDomain: WebDomain) -> ShieldConfiguration {
         return createTarkizShieldConfig()
     }
     
-    override func configuration(shielding webDomain: WebDomain, in category: ActivityCategory) -> ShieldConfiguration {
+    nonisolated override func configuration(shielding webDomain: WebDomain, in category: ActivityCategory) -> ShieldConfiguration {
         return createTarkizShieldConfig()
     }
     
     private func createTarkizShieldConfig() -> ShieldConfiguration {
+        // Fallback colors if the named ones aren't shared with the extension target
+        let primaryColor = UIColor(named: "AppPrimaryColor") ?? UIColor.systemBlue
+        let bgColor = UIColor(named: "BackgroundColor")?.withAlphaComponent(0.9) ?? UIColor.systemBackground.withAlphaComponent(0.9)
+        
         return ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterial,
-            backgroundColor: UIColor(named: "BackgroundColor")?.withAlphaComponent(0.9) ?? .systemBackground,
-            icon: UIImage(named: "NFCLogo"),
+            backgroundColor: bgColor,
+            icon: UIImage(named: "NFCLogo") ?? UIImage(systemName: "shield.fill"),
             title: ShieldConfiguration.Label(
                 text: "Blocked by Tarkiz",
-                color: UIColor(named: "AppPrimaryColor") ?? .systemBlue
+                color: primaryColor
             ),
             subtitle: ShieldConfiguration.Label(
                 text: "Stay focused on your goals. This app is currently restricted by Tarkiz to help you stay present and productive.",
@@ -49,10 +56,10 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 text: "Dismiss",
                 color: .white
             ),
-            primaryButtonBackgroundColor: UIColor(named: "AppPrimaryColor") ?? .systemBlue,
+            primaryButtonBackgroundColor: primaryColor,
             secondaryButtonLabel: ShieldConfiguration.Label(
                 text: "Unlock with NFC",
-                color: UIColor(named: "AppPrimaryColor") ?? .systemBlue
+                color: primaryColor
             )
         )
     }

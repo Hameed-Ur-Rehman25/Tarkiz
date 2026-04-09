@@ -55,7 +55,7 @@ struct NFCPairingView: View {
 
     var body: some View {
         ZStack {
-            Color.appBackground.ignoresSafeArea()
+            Color.white.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // Header
@@ -71,11 +71,12 @@ struct NFCPairingView: View {
                         }
                     }
                     Spacer()
+                }
+                .overlay(
                     Text("NFC Tag Setup")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.appForeground)
-                    Spacer().frame(width: 40)
-                }
+                )
                 .padding(.top, 56)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 32)
@@ -100,27 +101,12 @@ struct NFCInstructionsView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            // NFC Tag Illustration
-            ZStack {
-                RoundedRectangle(cornerRadius: 28)
-                    .fill(Color.appCard)
-                    .shadow(color: .black.opacity(0.12), radius: 25, y: 10)
-                    .frame(width: 160, height: 160)
-
-                CornerBrackets(size: 180, inset: 0, bracketLength: 24, cornerRadius: 8)
-                    .stroke(Color.appMutedForeground.opacity(0.3), lineWidth: 2)
-                    .frame(width: 180, height: 180)
-
-                VStack(spacing: 4) {
-                    Image(systemName: "wave.3.right")
-                        .font(.system(size: 36))
-                        .foregroundColor(.appPrimary)
-                    Text("NFC")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.appMutedForeground)
-                }
-            }
-            .padding(.top, 16)
+            // NFC Tag Illustration (Logo sitting directly on background)
+            Image("NFCLogo")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 180, height: 180)
+                .padding(.top, 16)
 
             // Steps
             VStack(alignment: .leading, spacing: 16) {
@@ -187,8 +173,11 @@ struct NFCScanningView: View {
                     .fill(Color.appPrimary)
                     .frame(width: 80, height: 80)
                     .overlay(
-                        Image(systemName: "wave.3.right")
-                            .font(.system(size: 30, weight: .bold))
+                        Image("NFCLogo")
+                            .resizable()
+                            .renderingMode(.template)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 44, height: 44)
                             .foregroundColor(.white)
                     )
             }

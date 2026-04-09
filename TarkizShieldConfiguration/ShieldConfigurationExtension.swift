@@ -35,24 +35,24 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     private func createTarkizShieldConfig() -> ShieldConfiguration {
         return ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterial,
-            backgroundColor: .systemBackground.withAlphaComponent(0.8),
-            icon: UIImage(named: "AppIcon") ?? UIImage(systemName: "shield.fill"),
+            backgroundColor: UIColor(named: "BackgroundColor")?.withAlphaComponent(0.9) ?? .systemBackground,
+            icon: UIImage(named: "NFCLogo"),
             title: ShieldConfiguration.Label(
                 text: "Blocked by Tarkiz",
-                color: appPrimaryColor
+                color: UIColor(named: "AppPrimaryColor") ?? .systemBlue
             ),
             subtitle: ShieldConfiguration.Label(
-                text: "Stay focused on your goals. This app is currently restricted to help you stay present and productive.",
+                text: "Stay focused on your goals. This app is currently restricted by Tarkiz to help you stay present and productive.",
                 color: .secondaryLabel
             ),
             primaryButtonLabel: ShieldConfiguration.Label(
                 text: "Dismiss",
                 color: .white
             ),
-            primaryButtonBackgroundColor: appPrimaryColor,
+            primaryButtonBackgroundColor: UIColor(named: "AppPrimaryColor") ?? .systemBlue,
             secondaryButtonLabel: ShieldConfiguration.Label(
                 text: "Unlock with NFC",
-                color: appPrimaryColor
+                color: UIColor(named: "AppPrimaryColor") ?? .systemBlue
             )
         )
     }

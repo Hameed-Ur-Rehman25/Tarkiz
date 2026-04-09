@@ -37,7 +37,6 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     
     private func createTarkizShieldConfig() -> ShieldConfiguration {
         // Premium Tarkiz Aesthetic (Emerald Sage & Dark Glass)
-        // components: R: 0.35, G: 0.55, B: 0.45
         let tarkizEmerald = UIColor(red: 0.35, green: 0.55, blue: 0.45, alpha: 1.0)
         let darkGlass = UIColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 0.9)
 
@@ -46,11 +45,11 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             backgroundColor: darkGlass,
             icon: UIImage(named: "NFCLogo") ?? UIImage(systemName: "shield.fill"),
             title: ShieldConfiguration.Label(
-                text: "Pause & Connect",
+                text: "Blocked by Tarkiz",
                 color: .white
             ),
             subtitle: ShieldConfiguration.Label(
-                text: "This app is resting so you can be fully present. Your focus is your greatest gift.",
+                text: "This app is restricted during Salah time. Focus on your prayer with peace and presence.",
                 color: .white.withAlphaComponent(0.7)
             ),
             primaryButtonLabel: ShieldConfiguration.Label(

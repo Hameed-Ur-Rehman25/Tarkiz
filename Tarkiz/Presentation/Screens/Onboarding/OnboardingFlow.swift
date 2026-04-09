@@ -1,6 +1,9 @@
 import SwiftUI
 import CoreLocation
 import Combine
+import FamilyControls
+import ManagedSettings
+import DeviceActivity
 
 // MARK: - Data Models (Onboarding specific)
 
@@ -58,20 +61,14 @@ class OnboardingFlowViewModel: ObservableObject {
     @Published var step: OnboardingStep = .welcome
     @Published var selectedLocation: OnboardingLocationOption?
     @Published var selectedMethod: CalculationMethod?
-    @Published var apps: [OnboardingAppItem] = onboardingDefaultApps
     @Published var nfcState: NFCScanState = .idle
 
     // Coordinates set either via GPS or geocoding a preset city
     var selectedLatitude: Double?
     var selectedLongitude: Double?
 
-    var blockedCount: Int { apps.filter(\.blocked).count }
-
-    func toggleApp(_ id: String) {
-        Haptics.impact(.light)
-        if let idx = apps.firstIndex(where: { $0.id == id }) {
-            apps[idx].blocked.toggle()
-        }
+    var blockedCount: Int { 
+        ScreenTimeService.shared.selection.applicationTokens.count + ScreenTimeService.shared.selection.categoryTokens.count
     }
 
     func selectLocation(_ loc: OnboardingLocationOption) {
@@ -591,19 +588,13 @@ private struct MethodStep: View {
 
 private struct BlocklistStep: View {
     @ObservedObject var vm: OnboardingFlowViewModel
+    @StateObject private var screenTimeService = ScreenTimeService.shared
+    @State private var isPickerPresented = false
     @State private var searchText: String = ""
     @State private var selectedCategory: String = "All"
 
-    private var availableCategories: [String] {
-        ["All"] + Array(Set(vm.apps.map(\.category))).sorted()
-    }
-
-    private var filteredApps: [OnboardingAppItem] {
-        vm.apps.filter { app in
-            let matchesCategory = selectedCategory == "All" || app.category == selectedCategory
-            let matchesSearch   = searchText.isEmpty || app.name.localizedCaseInsensitiveContains(searchText)
-            return matchesCategory && matchesSearch
-        }
+    private var selectionCount: Int {
+        screenTimeService.selection.applicationTokens.count + screenTimeService.selection.categoryTokens.count
     }
 
     var body: some View {
@@ -620,103 +611,126 @@ private struct BlocklistStep: View {
                 HStack {
                     BackButton { vm.goBack() }
                     Spacer()
-                    Text("\(vm.blockedCount) distraction\(vm.blockedCount != 1 ? "s" : "") selected")
+                    Text("\(selectionCount) items protected")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.appForeground)
                     Spacer()
-                    // Spacer equal to back button width for centering
                     Color.clear.frame(width: 40, height: 40)
                 }
-                .padding(.bottom, 14)
+                .padding(.bottom, 24)
 
-                // Quick actions
-                HStack(spacing: 8) {
-                    QuickActionButton(title: "Block All") {
-                        Haptics.impact(.medium)
-                        for i in vm.apps.indices { vm.apps[i].blocked = true }
-                    }
-                    QuickActionButton(title: "Unblock All") {
-                        Haptics.impact(.medium)
-                        for i in vm.apps.indices { vm.apps[i].blocked = false }
-                    }
-                    Spacer()
-                }
-                .padding(.bottom, 12)
-
-                // Search bar
-                HStack(spacing: 10) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.appMutedForeground)
-                    TextField("Search apps...", text: $searchText)
-                        .font(.system(size: 15))
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color.appSecondary.opacity(0.6))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .padding(.bottom, 10)
-
-                // Category chips
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(availableCategories, id: \.self) { cat in
-                            Button { selectedCategory = cat } label: {
-                                Text(cat)
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(selectedCategory == cat ? .white : .appMutedForeground)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(selectedCategory == cat ? Color.appPrimary : Color.appSecondary.opacity(0.5))
-                                    .clipShape(Capsule())
-                            }
+                if screenTimeService.isAuthorized {
+                    // Selection Summary Card
+                    VStack(spacing: 24) {
+                        Image(systemName: "shield.fill")
+                            .font(.system(size: 80))
+                            .foregroundColor(.appPrimary)
+                            .padding(.top, 20)
+                        
+                        VStack(spacing: 8) {
+                            Text("Screen Protection")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.appForeground)
+                            
+                            Text("Selected apps will be restricted\nduring your focus time.")
+                                .font(.system(size: 14))
+                                .foregroundColor(.appMutedForeground)
+                                .multilineTextAlignment(.center)
                         }
-                    }
-                }
-                .padding(.bottom, 12)
-
-                // App list
-                ScrollView {
-                    VStack(spacing: 0) {
-                        let list = filteredApps
-                        ForEach(Array(list.enumerated()), id: \.element.id) { idx, app in
-                            Button { vm.toggleApp(app.id) } label: {
-                                HStack(spacing: 14) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.appSecondary)
-                                            .frame(width: 48, height: 48)
-                                        Text(app.icon).font(.system(size: 24))
-                                    }
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(app.name)
-                                            .font(.system(size: 15, weight: .medium))
-                                            .foregroundColor(.appForeground)
-                                        if let avg = app.dailyAverage {
-                                            Text("Daily average : \(avg)")
-                                                .font(.system(size: 12))
-                                                .foregroundColor(.appMutedForeground)
-                                        } else {
-                                            Text(app.category)
-                                                .font(.system(size: 12))
-                                                .foregroundColor(.appMutedForeground)
-                                        }
-                                    }
-                                    Spacer()
-                                    Image(systemName: app.blocked ? "minus.circle.fill" : "plus.circle")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(app.blocked ? Color.appPrimary : .appMutedForeground)
-                                }
-                                .padding(.vertical, 12)
-                            }
-                            if idx < list.count - 1 {
-                                Divider().background(Color.appBorder).padding(.leading, 62)
-                            }
+                        
+                        VStack(alignment: .leading, spacing: 16) {
+                            SummaryRowCustom(
+                                icon: "folder.fill",
+                                label: "Categories",
+                                value: "\(screenTimeService.selection.categoryTokens.count) selected"
+                            )
+                            
+                            SummaryRowCustom(
+                                icon: "app.badge.fill",
+                                label: "Individual Apps",
+                                value: "\(screenTimeService.selection.applicationTokens.count) selected"
+                            )
                         }
+                        .padding(20)
+                        .background(Color.appSecondary.opacity(0.3))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        
+                        Button {
+                            isPickerPresented = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text(selectionCount == 0 ? "Select Apps to Block" : "Change Selection")
+                            }
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.appPrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        }
+                        .padding(.bottom, 10)
                     }
+                    .padding(24)
+                    .background(Color.appCard)
+                    .clipShape(RoundedRectangle(cornerRadius: 28))
+                    .padding(.bottom, 32)
+                } else {
+                    // Authorization Request Card
+                    VStack(spacing: 24) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.appPrimary.opacity(0.1))
+                                .frame(width: 100, height: 100)
+                            Image(systemName: "lock.shield.fill")
+                                .font(.system(size: 48))
+                                .foregroundColor(.appPrimary)
+                        }
+                        .padding(.top, 20)
+                        
+                        VStack(spacing: 12) {
+                            Text("Unlock Protection")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.appForeground)
+                            
+                            Text("Tarkiz needs your permission to manage app usage and show the app selector.")
+                                .font(.system(size: 15))
+                                .foregroundColor(.appMutedForeground)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 10)
+                        }
+                        
+                        Button {
+                            Task {
+                                await screenTimeService.requestAuthorization()
+                            }
+                        } label: {
+                            Text("Allow Access")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(Color.appPrimary)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                        }
+                        .padding(.bottom, 10)
+                        
+                        Text("This uses Apple's native Screen Time API for safety and privacy.")
+                            .font(.system(size: 12))
+                            .foregroundColor(.appMutedForeground.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(24)
+                    .background(Color.appCard)
+                    .clipShape(RoundedRectangle(cornerRadius: 28))
+                    .padding(.bottom, 32)
                 }
 
-                OnboardingPrimaryButton(title: "Complete setup") { vm.advance() }
-                    .padding(.top, 16)
+                Spacer()
+
+                OnboardingPrimaryButton(title: "Complete setup", disabled: selectionCount == 0) {
+                    vm.advance()
+                }
             }
             .padding(.horizontal, 24)
             .padding(.top, 20)
@@ -730,6 +744,33 @@ private struct BlocklistStep: View {
         }
         .background(Color.appBackground.ignoresSafeArea())
         .ignoresSafeArea(edges: .bottom)
+        .familyActivityPicker(isPresented: $isPickerPresented, selection: $screenTimeService.selection)
+    }
+}
+
+private struct SummaryRowCustom: View {
+    let icon: String
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.appPrimary.opacity(0.1))
+                    .frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                    .foregroundColor(.appPrimary)
+            }
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundColor(.appForeground)
+            Spacer()
+            Text(value)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.appMutedForeground)
+        }
     }
 }
 

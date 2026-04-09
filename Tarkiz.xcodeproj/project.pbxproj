@@ -10,16 +10,89 @@
 		BC5FF2C92F559881004EB142 /* FamilyControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2C82F559881004EB142 /* FamilyControls.framework */; };
 		BC5FF2CB2F55988D004EB142 /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */; };
 		BC5FF2CD2F55989B004EB142 /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2CC2F55989B004EB142 /* DeviceActivity.framework */; };
+		BCA8760A2F87917D00F53759 /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */; };
+		BCA8760C2F87917D00F53759 /* ManagedSettingsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCA8760B2F87917D00F53759 /* ManagedSettingsUI.framework */; };
+		BCA876142F87917D00F53759 /* TarkizShieldConfiguration.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BCA876092F87917D00F53759 /* TarkizShieldConfiguration.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BCA8761F2F8791D500F53759 /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */; };
+		BCA876272F8791D500F53759 /* TarkizShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BCA8761E2F8791D500F53759 /* TarkizShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BCA876122F87917D00F53759 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BCBB992D2F45DE27009E396D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCA876082F87917D00F53759;
+			remoteInfo = TarkizShieldConfiguration;
+		};
+		BCA876252F8791D500F53759 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BCBB992D2F45DE27009E396D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCA8761D2F8791D500F53759;
+			remoteInfo = TarkizShieldAction;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BCA876192F87917D00F53759 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				BCA876272F8791D500F53759 /* TarkizShieldAction.appex in Embed Foundation Extensions */,
+				BCA876142F87917D00F53759 /* TarkizShieldConfiguration.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		BC5FF2C82F559881004EB142 /* FamilyControls.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FamilyControls.framework; path = System/Library/Frameworks/FamilyControls.framework; sourceTree = SDKROOT; };
 		BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettings.framework; path = System/Library/Frameworks/ManagedSettings.framework; sourceTree = SDKROOT; };
 		BC5FF2CC2F55989B004EB142 /* DeviceActivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceActivity.framework; path = System/Library/Frameworks/DeviceActivity.framework; sourceTree = SDKROOT; };
+		BCA876092F87917D00F53759 /* TarkizShieldConfiguration.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TarkizShieldConfiguration.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCA8760B2F87917D00F53759 /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
+		BCA8761E2F8791D500F53759 /* TarkizShieldAction.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TarkizShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCBB99352F45DE27009E396D /* Tarkiz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tarkiz.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BCA876152F87917D00F53759 /* Exceptions for "TarkizShieldConfiguration" folder in "TarkizShieldConfiguration" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BCA876082F87917D00F53759 /* TarkizShieldConfiguration */;
+		};
+		BCA876282F8791D500F53759 /* Exceptions for "TarkizShieldAction" folder in "TarkizShieldAction" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BCA8761D2F8791D500F53759 /* TarkizShieldAction */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		BCA8760D2F87917D00F53759 /* TarkizShieldConfiguration */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BCA876152F87917D00F53759 /* Exceptions for "TarkizShieldConfiguration" folder in "TarkizShieldConfiguration" target */,
+			);
+			path = TarkizShieldConfiguration;
+			sourceTree = "<group>";
+		};
+		BCA876202F8791D500F53759 /* TarkizShieldAction */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BCA876282F8791D500F53759 /* Exceptions for "TarkizShieldAction" folder in "TarkizShieldAction" target */,
+			);
+			path = TarkizShieldAction;
+			sourceTree = "<group>";
+		};
 		BCBB99372F45DE27009E396D /* Tarkiz */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Tarkiz;
@@ -28,6 +101,23 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		BCA876062F87917D00F53759 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCA8760A2F87917D00F53759 /* ManagedSettings.framework in Frameworks */,
+				BCA8760C2F87917D00F53759 /* ManagedSettingsUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCA8761B2F8791D500F53759 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCA8761F2F8791D500F53759 /* ManagedSettings.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BCBB99322F45DE27009E396D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -47,6 +137,7 @@
 				BC5FF2CC2F55989B004EB142 /* DeviceActivity.framework */,
 				BC5FF2CA2F55988D004EB142 /* ManagedSettings.framework */,
 				BC5FF2C82F559881004EB142 /* FamilyControls.framework */,
+				BCA8760B2F87917D00F53759 /* ManagedSettingsUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -55,6 +146,8 @@
 			isa = PBXGroup;
 			children = (
 				BCBB99372F45DE27009E396D /* Tarkiz */,
+				BCA8760D2F87917D00F53759 /* TarkizShieldConfiguration */,
+				BCA876202F8791D500F53759 /* TarkizShieldAction */,
 				BC5FF2C72F559880004EB142 /* Frameworks */,
 				BCBB99362F45DE27009E396D /* Products */,
 			);
@@ -64,6 +157,8 @@
 			isa = PBXGroup;
 			children = (
 				BCBB99352F45DE27009E396D /* Tarkiz.app */,
+				BCA876092F87917D00F53759 /* TarkizShieldConfiguration.appex */,
+				BCA8761E2F8791D500F53759 /* TarkizShieldAction.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -71,6 +166,50 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		BCA876082F87917D00F53759 /* TarkizShieldConfiguration */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCA876162F87917D00F53759 /* Build configuration list for PBXNativeTarget "TarkizShieldConfiguration" */;
+			buildPhases = (
+				BCA876052F87917D00F53759 /* Sources */,
+				BCA876062F87917D00F53759 /* Frameworks */,
+				BCA876072F87917D00F53759 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BCA8760D2F87917D00F53759 /* TarkizShieldConfiguration */,
+			);
+			name = TarkizShieldConfiguration;
+			packageProductDependencies = (
+			);
+			productName = TarkizShieldConfiguration;
+			productReference = BCA876092F87917D00F53759 /* TarkizShieldConfiguration.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		BCA8761D2F8791D500F53759 /* TarkizShieldAction */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCA876292F8791D500F53759 /* Build configuration list for PBXNativeTarget "TarkizShieldAction" */;
+			buildPhases = (
+				BCA8761A2F8791D500F53759 /* Sources */,
+				BCA8761B2F8791D500F53759 /* Frameworks */,
+				BCA8761C2F8791D500F53759 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BCA876202F8791D500F53759 /* TarkizShieldAction */,
+			);
+			name = TarkizShieldAction;
+			packageProductDependencies = (
+			);
+			productName = TarkizShieldAction;
+			productReference = BCA8761E2F8791D500F53759 /* TarkizShieldAction.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		BCBB99342F45DE27009E396D /* Tarkiz */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BCBB99402F45DE29009E396D /* Build configuration list for PBXNativeTarget "Tarkiz" */;
@@ -78,10 +217,13 @@
 				BCBB99312F45DE27009E396D /* Sources */,
 				BCBB99322F45DE27009E396D /* Frameworks */,
 				BCBB99332F45DE27009E396D /* Resources */,
+				BCA876192F87917D00F53759 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				BCA876132F87917D00F53759 /* PBXTargetDependency */,
+				BCA876262F8791D500F53759 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				BCBB99372F45DE27009E396D /* Tarkiz */,
@@ -103,6 +245,12 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					BCA876082F87917D00F53759 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					BCA8761D2F8791D500F53759 = {
+						CreatedOnToolsVersion = 26.0;
+					};
 					BCBB99342F45DE27009E396D = {
 						CreatedOnToolsVersion = 26.0;
 					};
@@ -123,11 +271,27 @@
 			projectRoot = "";
 			targets = (
 				BCBB99342F45DE27009E396D /* Tarkiz */,
+				BCA876082F87917D00F53759 /* TarkizShieldConfiguration */,
+				BCA8761D2F8791D500F53759 /* TarkizShieldAction */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		BCA876072F87917D00F53759 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCA8761C2F8791D500F53759 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BCBB99332F45DE27009E396D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -138,6 +302,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		BCA876052F87917D00F53759 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCA8761A2F8791D500F53759 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BCBB99312F45DE27009E396D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -147,7 +325,140 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		BCA876132F87917D00F53759 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCA876082F87917D00F53759 /* TarkizShieldConfiguration */;
+			targetProxy = BCA876122F87917D00F53759 /* PBXContainerItemProxy */;
+		};
+		BCA876262F8791D500F53759 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCA8761D2F8791D500F53759 /* TarkizShieldAction */;
+			targetProxy = BCA876252F8791D500F53759 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		BCA876172F87917D00F53759 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_ENTITLEMENTS = TarkizShieldConfiguration/TarkizShieldConfiguration.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49W84348H5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TarkizShieldConfiguration/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TarkizShieldConfiguration;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hameed.tarkiz.TarkizShieldConfiguration;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BCA876182F87917D00F53759 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_ENTITLEMENTS = TarkizShieldConfiguration/TarkizShieldConfiguration.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49W84348H5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TarkizShieldConfiguration/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TarkizShieldConfiguration;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hameed.tarkiz.TarkizShieldConfiguration;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BCA8762A2F8791D500F53759 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_ENTITLEMENTS = TarkizShieldAction/TarkizShieldAction.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49W84348H5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TarkizShieldAction/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TarkizShieldAction;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hameed.tarkiz.TarkizShieldAction;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BCA8762B2F8791D500F53759 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_ENTITLEMENTS = TarkizShieldAction/TarkizShieldAction.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 49W84348H5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TarkizShieldAction/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TarkizShieldAction;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hameed.tarkiz.TarkizShieldAction;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		BCBB993E2F45DE29009E396D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -340,6 +651,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		BCA876162F87917D00F53759 /* Build configuration list for PBXNativeTarget "TarkizShieldConfiguration" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCA876172F87917D00F53759 /* Debug */,
+				BCA876182F87917D00F53759 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCA876292F8791D500F53759 /* Build configuration list for PBXNativeTarget "TarkizShieldAction" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCA8762A2F8791D500F53759 /* Debug */,
+				BCA8762B2F8791D500F53759 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BCBB99302F45DE27009E396D /* Build configuration list for PBXProject "Tarkiz" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

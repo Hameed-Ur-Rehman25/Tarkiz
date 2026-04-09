@@ -1,5 +1,8 @@
 import SwiftUI
 import Combine
+import FamilyControls
+import ManagedSettings
+import DeviceActivity
 
 // MARK: - AppItem Model (shared)
 
@@ -11,54 +14,7 @@ struct BlockedAppItem: Identifiable {
     var blocked: Bool
 }
 
-// MARK: - BlocklistViewModel
-
-class BlocklistViewModel: ObservableObject {
-    @Published var apps: [BlockedAppItem] = [
-        BlockedAppItem(id: "tiktok",    name: "TikTok",      icon: "🎵", category: "Social",        blocked: true),
-        BlockedAppItem(id: "instagram", name: "Instagram",    icon: "📷", category: "Social",        blocked: true),
-        BlockedAppItem(id: "facebook",  name: "Facebook",     icon: "👤", category: "Social",        blocked: true),
-        BlockedAppItem(id: "twitter",   name: "X (Twitter)",  icon: "🐦", category: "Social",        blocked: false),
-        BlockedAppItem(id: "youtube",   name: "YouTube",      icon: "▶️", category: "Entertainment", blocked: false),
-        BlockedAppItem(id: "netflix",   name: "Netflix",      icon: "🎬", category: "Entertainment", blocked: false),
-        BlockedAppItem(id: "reddit",    name: "Reddit",       icon: "🔴", category: "Social",        blocked: false),
-        BlockedAppItem(id: "candy",     name: "Candy Crush",  icon: "🍬", category: "Games",         blocked: false),
-    ]
-
-    @Published var searchText = ""
-    @Published var selectedCategory = "All"
-
-    var availableCategories: [String] {
-        ["All"] + Array(Set(apps.map(\.category))).sorted()
-    }
-
-    var filteredApps: [BlockedAppItem] {
-        apps.filter { app in
-            let matchesCategory = selectedCategory == "All" || app.category == selectedCategory
-            let matchesSearch = searchText.isEmpty || app.name.localizedCaseInsensitiveContains(searchText)
-            return matchesCategory && matchesSearch
-        }
-    }
-
-    var blockedCount: Int { apps.filter(\.blocked).count }
-
-    func toggle(_ id: String) {
-        Haptics.impact(.light)
-        if let i = apps.firstIndex(where: { $0.id == id }) {
-            apps[i].blocked.toggle()
-        }
-    }
-
-    func blockAll() {
-        Haptics.impact(.medium)
-        for i in apps.indices { apps[i].blocked = true }
-    }
-
-    func unblockAll() {
-        Haptics.impact(.medium)
-        for i in apps.indices { apps[i].blocked = false }
-    }
-}
+// BlocklistView is now powered directly by ScreenTimeService
 
 // MARK: - BlocklistView
 
@@ -90,7 +46,7 @@ struct BlocklistView: View {
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.appForeground)
                         Spacer()
-                        Text("\(screenTimeService.selection.applications.count + screenTimeService.selection.categories.count)")
+                        Text("\(screenTimeService.selection.applicationTokens.count + screenTimeService.selection.categoryTokens.count)")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.appMutedForeground)
                             .frame(width: 40)
@@ -99,37 +55,141 @@ struct BlocklistView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 24)
 
-                    // Selection Card
-                    VStack(spacing: 20) {
-                        Image(systemName: "shield.fill")
-                            .font(.system(size: 50))
-                            .foregroundColor(.appPrimary)
-                        
-                        Text("App Shielding is Active")
-                            .font(.system(size: 20, weight: .bold))
-                        
-                        Text("Apps selected here will be blocked when focus mode is active.")
-                            .font(.system(size: 14))
-                            .foregroundColor(.appMutedForeground)
-                            .multilineTextAlignment(.center)
-                        
-                        Button {
-                            isPickerPresented = true
-                        } label: {
-                            Text("Modify Selection")
-                                .font(.system(size: 16, weight: .medium))
+                    if screenTimeService.isAuthorized {
+                        // Detailed Selection List
+                        VStack(spacing: 20) {
+                            HStack {
+                                Text("Active Blocklist")
+                                    .font(.system(size: 20, weight: .bold))
+                                Spacer()
+                                Text("\(screenTimeService.selection.applicationTokens.count + screenTimeService.selection.categoryTokens.count) Items")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.appMutedForeground)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 4)
+                                    .background(Color.appSecondary)
+                                    .clipShape(Capsule())
+                            }
+                            .padding(.horizontal, 4)
+                            
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    if !screenTimeService.selection.categoryTokens.isEmpty {
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text("APP CATEGORIES")
+                                                .font(.system(size: 11, weight: .bold))
+                                                .foregroundColor(.appMutedForeground)
+                                                .tracking(1)
+                                            
+                                            ForEach(Array(screenTimeService.selection.categoryTokens), id: \.self) { token in
+                                                TokenRowView(categoryToken: token)
+                                            }
+                                        }
+                                        .padding(.bottom, 8)
+                                    }
+                                    
+                                    if !screenTimeService.selection.applicationTokens.isEmpty {
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text("INDIVIDUAL APPS")
+                                                .font(.system(size: 11, weight: .bold))
+                                                .foregroundColor(.appMutedForeground)
+                                                .tracking(1)
+                                            
+                                            ForEach(Array(screenTimeService.selection.applicationTokens), id: \.self) { token in
+                                                TokenRowView(applicationToken: token)
+                                            }
+                                        }
+                                    }
+                                    
+                                    if screenTimeService.selection.applicationTokens.isEmpty && screenTimeService.selection.categoryTokens.isEmpty {
+                                        VStack(spacing: 16) {
+                                            Image(systemName: "plus.app.fill")
+                                                .font(.system(size: 40))
+                                                .foregroundColor(.appMutedForeground.opacity(0.3))
+                                            Text("No apps selected yet.\nTap below to start blocking.")
+                                                .font(.system(size: 14))
+                                                .foregroundColor(.appMutedForeground)
+                                                .multilineTextAlignment(.center)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(.vertical, 40)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+                            .frame(maxHeight: 300) // Keep it compact but scrollable
+                            
+                            Button {
+                                isPickerPresented = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text(screenTimeService.selection.applicationTokens.isEmpty && screenTimeService.selection.categoryTokens.isEmpty ? "Select Apps to Block" : "Modify Selection")
+                                }
+                                .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
+                                .padding(.vertical, 16)
                                 .background(Color.appPrimary)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
+                            }
                         }
+                        .padding(24)
+                        .background(Color.appSecondary.opacity(0.4))
+                        .clipShape(RoundedRectangle(cornerRadius: 28))
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 32)
+                    } else {
+                        // Authorization Request Card
+                        VStack(spacing: 24) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.appPrimary.opacity(0.1))
+                                    .frame(width: 80, height: 80)
+                                Image(systemName: "lock.shield.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.appPrimary)
+                            }
+                            .padding(.top, 10)
+                            
+                            VStack(spacing: 12) {
+                                Text("Permission Required")
+                                    .font(.system(size: 20, weight: .bold))
+                                
+                                Text("Tarkiz needs permission to show the app selector and manage screen protection.")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.appMutedForeground)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+                            }
+                            
+                            Button {
+                                Task {
+                                    await screenTimeService.requestAuthorization()
+                                }
+                            } label: {
+                                Text("Grant Permission")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.appPrimary)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                            }
+                            .padding(.horizontal, 20)
+                            
+                            Text("If the permission dialog doesn't appear, please check Screen Time settings in your device Settings app.")
+                                .font(.system(size: 12))
+                                .foregroundColor(.appMutedForeground.opacity(0.7))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                        }
+                        .padding(24)
+                        .background(Color.appSecondary.opacity(0.4))
+                        .clipShape(RoundedRectangle(cornerRadius: 28))
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 32)
                     }
-                    .padding(24)
-                    .background(Color.appSecondary.opacity(0.3))
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 32)
                     
                     Spacer()
                 }
@@ -137,7 +197,7 @@ struct BlocklistView: View {
                 .clipShape(
                     RoundedCornerShape(radius: 56, corners: [.bottomLeft, .bottomRight])
                 )
-                .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
+                .shadow(color: .black.opacity(0.12), radius: 25, y: 15)
                 .padding(.bottom, 24)
             }
         }
@@ -151,51 +211,52 @@ struct BlocklistView: View {
 
 // MARK: - Supporting Views
 
-struct QuickActionButton: View {
-    let title: String
-    let action: () -> Void
+struct SelectionSummaryRow: View {
+    let icon: String
+    let label: String
+    let value: String
 
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 13, weight: .medium))
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.appPrimary.opacity(0.1))
+                    .frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                    .foregroundColor(.appPrimary)
+            }
+            Text(label)
+                .font(.system(size: 15))
                 .foregroundColor(.appForeground)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Color.appSecondary.opacity(0.7))
-                .clipShape(Capsule())
+            Spacer()
+            Text(value)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.appMutedForeground)
         }
     }
 }
 
-struct AppToggleRow: View {
-    let app: BlockedAppItem
-    let onToggle: () -> Void
-
+struct TokenRowView: View {
+    var applicationToken: ApplicationToken?
+    var categoryToken: ActivityCategoryToken?
+    
     var body: some View {
-        Button(action: onToggle) {
-            HStack(spacing: 16) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.appSecondary)
-                        .frame(width: 48, height: 48)
-                    Text(app.icon).font(.system(size: 24))
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(app.name)
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.appForeground)
-                    Text(app.category)
-                        .font(.system(size: 12))
-                        .foregroundColor(.appMutedForeground)
-                }
-                Spacer()
-                Image(systemName: app.blocked ? "minus.circle" : "plus.circle")
-                    .font(.system(size: 22))
-                    .foregroundColor(app.blocked ? .red.opacity(0.7) : .appMutedForeground)
+        HStack {
+            if let appToken = applicationToken {
+                Label(appToken)
+                    .font(.system(size: 15))
+            } else if let catToken = categoryToken {
+                Label(catToken)
+                    .font(.system(size: 15))
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 14)
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.green.opacity(0.7))
         }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .background(Color.appBackground.opacity(0.6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

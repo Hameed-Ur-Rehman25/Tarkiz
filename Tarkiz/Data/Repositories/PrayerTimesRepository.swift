@@ -4,7 +4,7 @@ import Combine
 // MARK: - Repository Protocol
 
 protocol PrayerTimesRepository {
-    func fetchTodayTimings(lat: Double, lon: Double, meth3eodId: Int) async throws -> PrayerTimesResponse
+    func fetchTodayTimings(lat: Double, lon: Double, methodId: Int) async throws -> PrayerTimesResponse
     func invalidateCache()
 }
 

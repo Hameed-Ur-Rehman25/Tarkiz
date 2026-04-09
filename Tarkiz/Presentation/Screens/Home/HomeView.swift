@@ -21,6 +21,13 @@ class HomeViewModel: ObservableObject {
     @Published var nfcSheetOpen = false
     @Published var protectedHours = 0
     @Published var protectedMinutes = 0
+
+    let prayerModes: [PrayerMode] = [
+        PrayerMode(id: "salah", name: "Salah Time", description: "Block during prayer windows", icon: "🕌", blockedApps: 12, categories: 3),
+        PrayerMode(id: "focus", name: "Focus Mode", description: "Deep concentration", icon: "🎯", blockedApps: 8, categories: 2),
+        PrayerMode(id: "quran", name: "Quran Time", description: "For recitation & study", icon: "📖", blockedApps: 15, categories: 4),
+    ]
+
     init() {
         self.selectedMode = PrayerMode(id: "salah", name: "Salah Time", description: "Block during prayer windows", icon: "🕌", blockedApps: 12, categories: 3)
     }

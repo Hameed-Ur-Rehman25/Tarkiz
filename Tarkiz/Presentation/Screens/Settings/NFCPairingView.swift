@@ -11,8 +11,9 @@ class NFCPairingViewModel: ObservableObject {
     init() {
         nfcManager.$scannedTagID
             .compactMap { $0 }
-            .sink { [weak self] _ in
+            .sink { [weak self] tagID in
                 Haptics.notification(.success)
+                UserSettings.shared.pairedNFCID = tagID // Persistent link
                 self?.scanState = .success
             }
             .store(in: &cancellables)
@@ -77,9 +78,9 @@ struct NFCPairingView: View {
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.appForeground)
                 )
-                .padding(.top, 56)
+                .padding(.top, 24)
                 .padding(.horizontal, 20)
-                .padding(.bottom, 32)
+                .padding(.bottom, 24)
 
                 switch viewModel.scanState {
                 case .idle:    NFCInstructionsView { viewModel.startScan() }

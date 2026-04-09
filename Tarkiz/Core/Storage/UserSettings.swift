@@ -61,6 +61,11 @@ final class UserSettings: ObservableObject {
         didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: Keys.hasCompletedOnboarding) }
     }
 
+    // MARK: - NFC
+    @Published var pairedNFCID: String? {
+        didSet { UserDefaults.standard.set(pairedNFCID, forKey: Keys.pairedNFCID) }
+    }
+
     // MARK: - Init
 
     private init() {
@@ -79,6 +84,7 @@ final class UserSettings: ObservableObject {
         maghribAdjust          = d.integer(forKey: Keys.maghribAdjust)
         ishaAdjust             = d.integer(forKey: Keys.ishaAdjust)
         hasCompletedOnboarding = d.bool(forKey: Keys.hasCompletedOnboarding)
+        pairedNFCID            = d.string(forKey: Keys.pairedNFCID)
     }
 
     // MARK: - Helpers
@@ -102,5 +108,6 @@ final class UserSettings: ObservableObject {
         static let maghribAdjust          = "maghribAdjust"
         static let ishaAdjust             = "ishaAdjust"
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
+        static let pairedNFCID            = "pairedNFCID"
     }
 }

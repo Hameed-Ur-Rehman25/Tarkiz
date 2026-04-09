@@ -42,16 +42,17 @@ struct BlocklistView: View {
                             }
                         }
                         Spacer()
-                        Text("Blocked Apps")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.appForeground)
-                        Spacer()
                         Text("\(screenTimeService.selection.applicationTokens.count + screenTimeService.selection.categoryTokens.count)")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.appMutedForeground)
                             .frame(width: 40)
                     }
-                    .padding(.top, 56)
+                    .overlay(
+                        Text("Blocked Apps")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.appForeground)
+                    )
+                    .padding(.top, 24)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 24)
 

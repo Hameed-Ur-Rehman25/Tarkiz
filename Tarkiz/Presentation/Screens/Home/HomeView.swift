@@ -208,54 +208,101 @@ struct ModeSelectorSheet: View {
 struct NFCScanSheetView: View {
     @Binding var isPresented: Bool
     var onSuccess: () -> Void
-    @State private var scanning = false
+    
+    @StateObject private var nfcManager = NFCManager()
+    @State private var errorMessage: String?
+    @State private var isSuccess = false
 
     var body: some View {
-        VStack(spacing: 24) {
-            Text("Scan NFC Tag")
+        VStack(spacing: 20) {
+            Text(isSuccess ? "Scan Successful!" : "Scan NFC Tag")
                 .font(.system(size: 20, weight: .semibold))
-                .padding(.top, 8)
+                .foregroundColor(.appForeground)
+                .padding(.top, 12)
 
             ZStack {
                 Circle()
-                    .stroke(Color.appAccent.opacity(0.2), lineWidth: 3)
-                    .frame(width: 120, height: 120)
-                if scanning {
+                    .stroke(isSuccess ? Color.green.opacity(0.15) : Color.appAccent.opacity(0.15), lineWidth: 3)
+                    .frame(width: 100, height: 100)
+                
+                if nfcManager.isScanning {
                     Circle()
-                        .stroke(Color.appAccent.opacity(0.5), lineWidth: 3)
-                        .frame(width: 120, height: 120)
-                        .scaleEffect(1.4)
+                        .stroke(Color.appAccent.opacity(0.3), lineWidth: 3)
+                        .frame(width: 100, height: 100)
+                        .scaleEffect(1.3)
                         .opacity(0)
-                        .animation(.easeOut(duration: 1.5).repeatForever(autoreverses: false), value: scanning)
+                        .animation(.easeOut(duration: 1.2).repeatForever(autoreverses: false), value: nfcManager.isScanning)
                 }
-                Image(systemName: "wave.3.right")
-                    .font(.system(size: 40))
-                    .foregroundColor(.appAccent)
+                
+                Image(systemName: isSuccess ? "checkmark" : "wave.3.right")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(isSuccess ? .green : .appAccent)
+            }
+            .padding(.vertical, 10)
+
+            if let error = errorMessage {
+                Text(error)
+                    .font(.system(size: 14))
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .frame(height: 40)
+            } else {
+                Text(isSuccess ? "Identity verified. Toggling protection..." : "Hold your phone near the NFC tag")
+                    .font(.system(size: 14))
+                    .foregroundColor(.appMutedForeground)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .frame(height: 40)
             }
 
-            Text("Hold your phone near the NFC tag")
-                .font(.system(size: 14))
-                .foregroundColor(.appMutedForeground)
-
             Button {
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
-                onSuccess()
-                isPresented = false
+                nfcManager.startScanning()
+                errorMessage = nil
             } label: {
-                Text("Simulate Scan")
-                    .font(.system(size: 16, weight: .medium))
+                Text(errorMessage != nil ? "Try Again" : "Start Scan")
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                    .padding(.vertical, 16)
                     .background(Color.appAccent)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
             }
-            .padding(.horizontal)
-
-            Spacer()
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+            .disabled(isSuccess)
         }
-        .padding()
-        .background(Color.appBackground.ignoresSafeArea())
-        .onAppear { scanning = true }
+        .padding(.horizontal)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            // Automatically start scanning if a tag is paired
+            if UserSettings.shared.pairedNFCID != nil {
+                nfcManager.startScanning()
+            } else {
+                errorMessage = "No tag paired. Please go to Settings to set up your NFC tag."
+            }
+        }
+        .onReceive(nfcManager.$scannedTagID) { tagID in
+            guard let tagID = tagID else { return }
+            
+            if tagID == UserSettings.shared.pairedNFCID {
+                Haptics.notification(.success)
+                isSuccess = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    onSuccess()
+                    isPresented = false
+                }
+            } else {
+                Haptics.notification(.error)
+                errorMessage = "This tag is not paired with your account. Access denied."
+                nfcManager.stopScanning()
+            }
+        }
+        .onReceive(nfcManager.$error) { error in
+            if let error = error {
+                errorMessage = error.localizedDescription
+            }
+        }
     }
 }

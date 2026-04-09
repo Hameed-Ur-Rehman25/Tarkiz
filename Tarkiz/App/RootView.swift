@@ -79,11 +79,7 @@ struct MainTabView: View {
             Color.appCard.ignoresSafeArea(edges: .top).frame(height: 0)
         }
         .safeAreaInset(edge: .bottom) {
-            if !coordinator.isTabBarHidden {
-                CustomTabBar(selectedTab: $coordinator.selectedTab)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .animation(.spring(response: 0.35, dampingFraction: 0.8), value: coordinator.isTabBarHidden)
-            }
+            CustomTabBar(selectedTab: $coordinator.selectedTab)
         }
         .tint(.appPrimary)
     }

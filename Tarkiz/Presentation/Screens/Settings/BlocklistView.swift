@@ -206,12 +206,6 @@ struct BlocklistView: View {
             screenTimeService.applyShield()
         }
         .navigationBarHidden(true)
-        .onAppear {
-            withAnimation { coordinator.isTabBarHidden = true }
-        }
-        .onDisappear {
-            withAnimation { coordinator.isTabBarHidden = false }
-        }
     }
 }
 

@@ -34,7 +34,6 @@ class AppCoordinator: ObservableObject {
     @Published var hasCompletedOnboarding = false
     @Published var isLocked = false
     @Published var selectedTab: MainTab = .home
-    @Published var isTabBarHidden: Bool = false
     @Published var navigationPath = NavigationPath()
 
     func completeOnboarding() {

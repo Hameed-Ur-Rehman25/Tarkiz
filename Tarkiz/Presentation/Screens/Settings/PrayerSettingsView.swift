@@ -265,12 +265,8 @@ struct PrayerSettingsView: View {
             }
         }
         .navigationBarHidden(true)
-        .onAppear {
-            withAnimation { coordinator.isTabBarHidden = true }
-        }
         .onDisappear {
             viewModel.saveSettings()
-            withAnimation { coordinator.isTabBarHidden = false }
         }
     }
 }

@@ -1,36 +1,14 @@
 import SwiftUI
 import Combine
-
-// MARK: - Data Models
-
-struct PrayerMode: Identifiable {
-    let id: String
-    let name: String
-    let description: String
-    let icon: String
-    let blockedApps: Int
-    let categories: Int
-}
+import FamilyControls
 
 // MARK: - HomeViewModel
 
 class HomeViewModel: ObservableObject {
-    @Published var isLocked = true
-    @Published var selectedMode: PrayerMode
-    @Published var modeSelectorOpen = false
+    @Published var isLocked = false
     @Published var nfcSheetOpen = false
     @Published var protectedHours = 0
     @Published var protectedMinutes = 0
-
-    let prayerModes: [PrayerMode] = [
-        PrayerMode(id: "salah", name: "Salah Time", description: "Block during prayer windows", icon: "🕌", blockedApps: 12, categories: 3),
-        PrayerMode(id: "focus", name: "Focus Mode", description: "Deep concentration", icon: "🎯", blockedApps: 8, categories: 2),
-        PrayerMode(id: "quran", name: "Quran Time", description: "For recitation & study", icon: "📖", blockedApps: 15, categories: 4),
-    ]
-
-    init() {
-        self.selectedMode = PrayerMode(id: "salah", name: "Salah Time", description: "Block during prayer windows", icon: "🕌", blockedApps: 12, categories: 3)
-    }
 
     func toggleLock() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
@@ -43,6 +21,7 @@ class HomeViewModel: ObservableObject {
 
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var screenTimeService = ScreenTimeService.shared
 
     var body: some View {
         ZStack {
@@ -73,29 +52,19 @@ struct HomeView: View {
                         .resizable()
                         .scaledToFill()
                         .frame(width: 176, height: 176)
+                        .padding(.top, 20)
 
-                    // Mode selector button
-                    Button {
-                        viewModel.modeSelectorOpen = true
-                    } label: {
-                        HStack(spacing: 6) {
-                            Text("Mode:")
-                                .font(.system(size: 18))
-                                .foregroundColor(.appMutedForeground)
-                            Text(viewModel.selectedMode.name)
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.appForeground)
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 14))
-                                .foregroundColor(.appMutedForeground)
-                        }
+                    // Real-time Protection Counts
+                    VStack(spacing: 4) {
+                        Text("\(screenTimeService.selection.applicationTokens.count) Apps, \(screenTimeService.selection.categoryTokens.count) Categories")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.appForeground)
+                        Text("Total Protected Items")
+                            .font(.system(size: 14))
+                            .foregroundColor(.appMutedForeground)
+                            .tracking(0.5)
                     }
-                    .padding(.top, 16)
-
-                    Text("Blocking \(viewModel.selectedMode.blockedApps) apps, \(viewModel.selectedMode.categories) categories")
-                        .font(.system(size: 14))
-                        .foregroundColor(.appMutedForeground)
-                        .padding(.top, 4)
+                    .padding(.top, 24)
 
                     Spacer()
 
@@ -117,7 +86,7 @@ struct HomeView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 24))
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 48) // Added padding since the panel is gone
+                    .padding(.bottom, 48)
                 }
                 .background(Color.appCard)
                 .clipShape(
@@ -127,15 +96,6 @@ struct HomeView: View {
                 .padding(.bottom, 120)
             }
         }
-        .sheet(isPresented: $viewModel.modeSelectorOpen) {
-            ModeSelectorSheet(
-                modes: viewModel.prayerModes,
-                selectedMode: $viewModel.selectedMode,
-                isPresented: $viewModel.modeSelectorOpen
-            )
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
-        }
         .sheet(isPresented: $viewModel.nfcSheetOpen) {
             NFCScanSheetView(
                 isPresented: $viewModel.nfcSheetOpen,
@@ -144,62 +104,6 @@ struct HomeView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-    }
-}
-
-// MARK: - Mode Selector Sheet
-
-struct ModeSelectorSheet: View {
-    let modes: [PrayerMode]
-    @Binding var selectedMode: PrayerMode
-    @Binding var isPresented: Bool
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Select Mode")
-                .font(.system(size: 18, weight: .semibold))
-                .padding(.top, 8)
-
-            ForEach(modes) { mode in
-                Button {
-                    selectedMode = mode
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    isPresented = false
-                } label: {
-                    HStack(spacing: 16) {
-                        Text(mode.icon)
-                            .font(.system(size: 32))
-                            .frame(width: 56, height: 56)
-                            .background(Color.appSecondary.opacity(0.5))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(mode.name)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.appForeground)
-                            Text(mode.description)
-                                .font(.system(size: 13))
-                                .foregroundColor(.appMutedForeground)
-                        }
-                        Spacer()
-                        if mode.id == selectedMode.id {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.appAccent)
-                        }
-                    }
-                    .padding(16)
-                    .background(
-                        mode.id == selectedMode.id
-                            ? Color.appAccent.opacity(0.08)
-                            : Color.appSecondary.opacity(0.3)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                }
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 20)
-        .background(Color.appBackground.ignoresSafeArea())
     }
 }
 
